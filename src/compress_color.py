@@ -27,7 +27,7 @@ def snake(size):
         reset = np.flip(reset)
         dxdy = np.flip(dxdy)
 
-def encode(image, chunk_size, snake_len):
+def encode_chunk(image, chunk_size, snake_len):
     ycbcr = rgb2ycbcr(image)
     y, color_prime = ycbcr[:,:,0], ycbcr[:,:,1:]
 
@@ -39,13 +39,13 @@ def encode(image, chunk_size, snake_len):
 
     return y, color_prime
 
-def decode(y, color_prime, chunk_size, snake_len):
+def decode_chunk(y, color_prime, chunk_size, snake_len):
     snake_r, snake_c = snake(snake_len)
-    channel_height_chunks, channel_width_chunks, _ = encoded.shape
-    color = np.zeros((channel_height_chunks, channel_width_chunks, chunk_size, chunk_size))
+    channel_height_chunks, channel_width_chunks, _, _, _ = color_prime.shape
+    color = np.zeros((channel_height_chunks, channel_width_chunks, 2, chunk_size, chunk_size, 1))
     color[:, :, :, snake_r, snake_c, :] = color_prime
     color = idctn(color, axes=(3,4), norm='ortho')
-    channel = np.swapaxis(channel, 1, 2)
+    color = np.moveaxis(color, (0, 3, 5, 1, 4, 2), (0, 1, 2, 3, 4, 5))
     color = np.reshape(color, (channel_height_chunks*chunk_size, channel_width_chunks*chunk_size, 2))
 
     return ycbcr2rgb(np.dstack((y, color)))
@@ -70,17 +70,17 @@ def decode_whole(y, color_prime, snake_len):
     return ycbcr2rgb(np.dstack((y, color)))
 
 # parameters control color quality
-chunk_size = 200
+chunk_size = 500
 snake_len = 20
 
-image = img_as_float(imread('square4.png'))
+image = img_as_float(imread('square3.jpeg'))
 h, w, _ = image.shape
 image = resize(image, (h-h%chunk_size, w-w%chunk_size, 3))
 
 #y, color_prime = encode_whole(image, snake_len)
 #image2 = decode_whole(y, color_prime, snake_len)
-y, color_prime = encode(image, chunk_size, snake_len)
-image2 = decode(y, color_prime, chunk_size, snake_len)
+y, color_prime = encode_chunk(image, chunk_size, snake_len)
+image2 = decode_chunk(y, color_prime, chunk_size, snake_len)
 
 print('old color parameters', image[:,:,:2].size)
 print('new color parameters', color_prime.size)
