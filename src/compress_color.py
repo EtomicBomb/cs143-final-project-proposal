@@ -71,12 +71,20 @@ def decode_whole(y, color_prime, snake_len):
     return ycbcr2rgb(np.dstack((y, color)))
 
 def get_dataset(path, resize_height, resize_width, snake_len, mode, chunk_size):
+    '''
+    Produces inputs = (image_count, height, width) and outputs = (image_count, snake_len, 2)
+    for mode == 'whole'
+    or outputs = (image_count, height_chunks, width_chunks, 2, snake_len, 1) for mode == 'chunk'
+    '''
     inputs = []
     outputs = []
-    for raw_image_path in glob.glob(path):
+    for (i, raw_image_path) in enumerate(glob.glob(path)):
         image = imread(raw_image_path)
         image = img_as_float(image)
         image = resize(image, (resize_height, resize_width, 3))
+
+        # TODO: consider resize greyscale separately?
+        # TODO: consider center crop to square before resize?
         
         y, color_prime = None, None
         if mode == 'whole':
@@ -86,8 +94,6 @@ def get_dataset(path, resize_height, resize_width, snake_len, mode, chunk_size):
         else:
             raise ValueError('bad mode ' + mode)
 
-        # todo: consider swapping axes and resizing greyscale separately 
-
         inputs.append(y)
         outputs.append(color_prime)
 
@@ -96,24 +102,21 @@ def get_dataset(path, resize_height, resize_width, snake_len, mode, chunk_size):
     
     return inputs, outputs
 
-inputs, outputs = get_dataset('raw/*', 400, 400, 500, 'whole', None) 
-
+inputs, outputs = get_dataset('raw/*', 160, 200, 500, 'whole', None) 
+#inputs, outputs = get_dataset('raw/*', 160, 200, 10, 'chunk', 40) 
 np.save('inputs', inputs)
 np.save('outputs', outputs)
 
-
 ## parameters control color quality
-#chunk_size = 500
-#snake_len = 20
 #
-#image = img_as_float(imread('square3.jpeg'))
+#image = img_as_float(imread('raw/11746452_5bc1749a36.jpg'))
 #h, w, _ = image.shape
 #image = resize(image, (h-h%chunk_size, w-w%chunk_size, 3))
 #
-##y, color_prime = encode_whole(image, snake_len)
-##image2 = decode_whole(y, color_prime, snake_len)
-#y, color_prime = encode_chunk(image, chunk_size, snake_len)
-#image2 = decode_chunk(y, color_prime, chunk_size, snake_len)
+#y, color_prime = encode_whole(image, snake_len)
+#image2 = decode_whole(y, color_prime, snake_len)
+##y, color_prime = encode_chunk(image, chunk_size, snake_len)
+##image2 = decode_chunk(y, color_prime, chunk_size, snake_len)
 #
 #print('old color parameters', image[:,:,:2].size)
 #print('new color parameters', color_prime.size)
