@@ -83,6 +83,7 @@ def get_dataset(path, snake_len, mode, chunk_size):
         image = img_as_float(image)
         
         if len(image.shape) != 3 or image.shape[2] != 3:
+            # TODO: remove these from thumb
             continue
 
         # TODO: consider resize greyscale separately?
@@ -104,7 +105,7 @@ def get_dataset(path, snake_len, mode, chunk_size):
     
     return inputs, outputs
 
-# mogrify -path 'thumb' -resize "100^>" -gravity center -crop 100x100+0+0 -strip 'raw/*'
+# mogrify -path 'thumb' -resize '100x100^' -gravity center -extent 100x100 -strip 'raw/*'
 
 inputs, outputs = get_dataset('thumb/*', 500, 'whole', None) 
 #inputs, outputs = get_dataset('thumb/*', 10, 'chunk', 40) 
