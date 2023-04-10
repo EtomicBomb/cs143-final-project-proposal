@@ -6,6 +6,7 @@ from skimage.transform import resize
 from scipy.fft import dctn, idctn
 import numpy as np
 import matplotlib.pyplot as plt
+import glob
 
 def snake(size):
     indices = np.zeros((2, size), dtype=int)
@@ -69,23 +70,55 @@ def decode_whole(y, color_prime, snake_len):
 
     return ycbcr2rgb(np.dstack((y, color)))
 
-# parameters control color quality
-chunk_size = 500
-snake_len = 20
+def get_dataset(path, resize_height, resize_width, snake_len, mode, chunk_size):
+    inputs = []
+    outputs = []
+    for raw_image_path in glob.glob(path):
+        image = imread(raw_image_path)
+        image = img_as_float(image)
+        image = resize(image, (resize_height, resize_width, 3))
+        
+        y, color_prime = None, None
+        if mode == 'whole':
+            y, color_prime = encode_whole(image, snake_len)
+        elif mode == 'chunk':
+            y, color_prime = encode_chunk(image, chunk_size, snake_len)
+        else:
+            raise ValueError('bad mode ' + mode)
 
-image = img_as_float(imread('square3.jpeg'))
-h, w, _ = image.shape
-image = resize(image, (h-h%chunk_size, w-w%chunk_size, 3))
+        # todo: consider swapping axes and resizing greyscale separately 
 
-#y, color_prime = encode_whole(image, snake_len)
-#image2 = decode_whole(y, color_prime, snake_len)
-y, color_prime = encode_chunk(image, chunk_size, snake_len)
-image2 = decode_chunk(y, color_prime, chunk_size, snake_len)
+        inputs.append(y)
+        outputs.append(color_prime)
 
-print('old color parameters', image[:,:,:2].size)
-print('new color parameters', color_prime.size)
+    inputs = np.stack(inputs)
+    outputs = np.stack(outputs)
+    
+    return inputs, outputs
 
-f, (plot1, plot2) = plt.subplots(2,1) 
-plot1.imshow(image)
-plot2.imshow(image2)
-plt.show()
+inputs, outputs = get_dataset('raw/*', 400, 400, 500, 'whole', None) 
+
+np.save('inputs', inputs)
+np.save('outputs', outputs)
+
+
+## parameters control color quality
+#chunk_size = 500
+#snake_len = 20
+#
+#image = img_as_float(imread('square3.jpeg'))
+#h, w, _ = image.shape
+#image = resize(image, (h-h%chunk_size, w-w%chunk_size, 3))
+#
+##y, color_prime = encode_whole(image, snake_len)
+##image2 = decode_whole(y, color_prime, snake_len)
+#y, color_prime = encode_chunk(image, chunk_size, snake_len)
+#image2 = decode_chunk(y, color_prime, chunk_size, snake_len)
+#
+#print('old color parameters', image[:,:,:2].size)
+#print('new color parameters', color_prime.size)
+#
+#f, (plot1, plot2) = plt.subplots(2,1) 
+#plot1.imshow(image)
+#plot2.imshow(image2)
+#plt.show()
