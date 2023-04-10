@@ -70,7 +70,7 @@ def decode_whole(y, color_prime, snake_len):
 
     return ycbcr2rgb(np.dstack((y, color)))
 
-def get_dataset(path, resize_height, resize_width, snake_len, mode, chunk_size):
+def get_dataset(path, snake_len, mode, chunk_size):
     '''
     Produces inputs = (image_count, height, width) and outputs = (image_count, snake_len, 2)
     for mode == 'whole'
@@ -81,7 +81,9 @@ def get_dataset(path, resize_height, resize_width, snake_len, mode, chunk_size):
     for (i, raw_image_path) in enumerate(glob.glob(path)):
         image = imread(raw_image_path)
         image = img_as_float(image)
-        image = resize(image, (resize_height, resize_width, 3))
+        
+        if len(image.shape) != 3 or image.shape[2] != 3:
+            continue
 
         # TODO: consider resize greyscale separately?
         # TODO: consider center crop to square before resize?
@@ -102,8 +104,10 @@ def get_dataset(path, resize_height, resize_width, snake_len, mode, chunk_size):
     
     return inputs, outputs
 
-inputs, outputs = get_dataset('raw/*', 160, 200, 500, 'whole', None) 
-#inputs, outputs = get_dataset('raw/*', 160, 200, 10, 'chunk', 40) 
+# mogrify -path 'thumb' -resize "100^>" -gravity center -crop 100x100+0+0 -strip 'raw/*'
+
+inputs, outputs = get_dataset('thumb/*', 500, 'whole', None) 
+#inputs, outputs = get_dataset('thumb/*', 10, 'chunk', 40) 
 np.save('inputs', inputs)
 np.save('outputs', outputs)
 
