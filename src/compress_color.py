@@ -8,6 +8,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import glob
 
+def get_quantization(snake_len):
+    quant_epsilon = 0.0001
+    quantization = np.full((1, 2*snake_len), quant_epsilon)
+    quantization[:, :4] += np.reshape(np.flip(np.square(np.arange(4))), (1, -1))
+    print(quantization)
+    return quantization
+
 def snake(size):
     indices = np.zeros((2, size), dtype=int)
     xy = np.array([0, 0])
@@ -51,12 +58,16 @@ def decode_chunk(y, color_prime, chunk_size, snake_len):
 
     return ycbcr2rgb(np.dstack((y, color)))
 
+def lerp(x, in_min, in_max, out_min, out_max):
+    return out_min + (x-in_min) * (out_max-out_min) / (in_max-in_min)
+
 def encode_whole(image, snake_len):
     ycbcr = rgb2ycbcr(image)
     y, color = ycbcr[:,:,0], ycbcr[:,:,1:]
-
+    color = lerp(color, 16, 240, -1, 1)
     snake_r, snake_c = snake(snake_len)
-    color_prime = dctn(color, axes=(0,1), norm='ortho')[snake_r, snake_c, :]
+    color_prime = dctn(color, axes=(0,1), norm='forward')[snake_r, snake_c, :]
+#    color_prime = dctn(color, axes=(0,1), norm='ortho')[snake_r, snake_c, :]
 
     return y, color_prime
 
@@ -66,8 +77,9 @@ def decode_whole(y, color_prime, snake_len):
 
     color = np.zeros((height, width, 2))
     color[snake_r,snake_c,:] = color_prime[:,:]
-    color = idctn(color, axes=(0,1), norm='ortho')
-
+    color = idctn(color, axes=(0,1), norm='forward')
+#    color = idctn(color, axes=(0,1), norm='ortho')
+    color = lerp(color, -1, 1, 16, 240)
     return ycbcr2rgb(np.dstack((y, color)))
 
 def get_dataset(path, snake_len, mode, chunk_size):
@@ -106,11 +118,12 @@ def get_dataset(path, snake_len, mode, chunk_size):
     return inputs, outputs
 
 # mogrify -path 'thumb' -resize '100x100^' -gravity center -extent 100x100 -strip 'raw/*'
+if __name__ == '__main__':
 
-inputs, outputs = get_dataset('thumb/*', 500, 'whole', None) 
-#inputs, outputs = get_dataset('thumb/*', 10, 'chunk', 40) 
-np.save('inputs', inputs)
-np.save('outputs', outputs)
+    inputs, outputs = get_dataset('thumb/*', 500, 'whole', None) 
+    #inputs, outputs = get_dataset('thumb/*', 10, 'chunk', 40) 
+    np.save('inputs', inputs)
+    np.save('outputs', outputs)
 
 ## parameters control color quality
 #
