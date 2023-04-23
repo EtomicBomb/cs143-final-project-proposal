@@ -1,4 +1,7 @@
 /raw/
 /thumb/
+/data/
+/log/
 /inputs.npy
 /outputs.npy
+/__pycache__/

@@ -1,0 +1,12 @@
+hint_radius = 5
+training_path = 'data/training'
+validation_path = 'data/validate'
+dataset_path = 'raw/*'
+shuffle_buffer_size = 1000
+batch_size = 32
+validation_frac = 0.2
+file_include_times = 5
+max_num_hint_points = 5.0
+image_height = 224
+image_width = 224
+epochs_count = 100
