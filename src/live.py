@@ -13,28 +13,17 @@ from skimage.io import imread
 from skimage.color import rgb2gray
 from skimage.transform import rescale
 
+from diffusion import *
 from compress_color import *
 
+snake_len = 1000
+t_max = 2*snake_len + snake_len
+diffusion = Diffusion(0.95, 2*snake_len, t_max)
 
 value = {'a': 0}
-cluster_centers = None
-
-snake_len = 30
-quantization = get_quantization(snake_len)
 
 def update_value(v):
     value['a'] = v
-
-def bin_snake(snake):
-    snake = np.ravel(snake) * quantization
-    difference = np.sum(np.square(cluster_centers - snake), axis=1)
-    best_bin = np.argmin(difference)
-    
-    return best_bin
-
-def unbin_snake(cluster_index):
-    cluster_center = cluster_centers[cluster_index,:] / quantization
-    return np.reshape(cluster_center, (snake_len, 2))
 
 def my_get_images():
     vc = cv2.VideoCapture(0)
@@ -47,7 +36,7 @@ def my_get_images():
         while image is None:
             _, image = vc.read()
 
-        image = cv2.imread('/home/ethan/Pictures/flower2.jpeg')
+        image = cv2.imread('/home/ethan/Pictures/flower.jpeg')
         image = img_as_float32(image)
 
 #        if image.shape[1] > image.shape[0]:
@@ -63,26 +52,27 @@ def my_get_images():
 
     def get_images_ret():
         image = read_webcam()
-        snake_len = 30
-        y, color_prime = encode_whole(image, snake_len)
-        image2 = decode_whole(y, color_prime, snake_len) 
 
-        color_prime_unbinned = unbin_snake(bin_snake(color_prime))
-        image3 = decode_whole(y, color_prime_unbinned, snake_len)
+        y, color_prime = encode_whole(image, snake_len)
+
+
+        color_prime_prime = np.reshape(diffusion.sample(np.ravel(color_prime), value['a']), (-1, 2))
+        print(np.min(color_prime), np.max(color_prime), np.min(color_prime_prime), np.max(color_prime_prime))
+
+        image2 = decode_whole(y, color_prime_prime, snake_len) 
 
 #        snake_len = 4
 #        chunk_size = 20
 #        y, color_prime = encode_chunk(image, chunk_size, snake_len)
 #        image2 = decode_chunk(y, color_prime, chunk_size, snake_len)
-        return np.hstack((image, image2, image3))
+        return np.hstack((image, image2))
         
     return get_images_ret
 
 
 def feed(get_images):
-
     cv2.namedWindow("Live Demo", 0)
-    cv2.createTrackbar('slider', "Live Demo", 0, 800, update_value)
+    cv2.createTrackbar('slider', "Live Demo", 0, t_max-1, update_value)
 
     # Main loop
     while True:
@@ -100,5 +90,4 @@ def feed(get_images):
 
 if __name__ == '__main__':
 #    cluster_centers = pickle.load(open("cluster-centers.pkl", "rb"))
-    cluster_centers = np.load('cluster-centers.npy')
     feed(my_get_images())

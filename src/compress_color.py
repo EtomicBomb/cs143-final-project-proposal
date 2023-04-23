@@ -59,7 +59,8 @@ def decode_chunk(y, color_prime, chunk_size, snake_len):
     return ycbcr2rgb(np.dstack((y, color)))
 
 def lerp(x, in_min, in_max, out_min, out_max):
-    return out_min + (x-in_min) * (out_max-out_min) / (in_max-in_min)
+    ret = out_min + (x-in_min) * (out_max-out_min) / (in_max-in_min)
+    return np.clip(ret, out_min, out_max)
 
 def encode_whole(image, snake_len):
     ycbcr = rgb2ycbcr(image)
