@@ -2,14 +2,14 @@
 // Get the input image and canvas elements
 const upload = document.getElementById('upload');
 upload.onclick = uploadImage();
+const uploadLabel = document.getElementById('uploadLabel');
+
 const canvas = document.getElementById('canvas');
 const context = canvas.getContext('2d');
 
-const actualBtn = document.getElementById('upload');
-
-const fileChosen = document.getElementById('file-chosen');
 
 const clear = document.getElementById('clear');
+const colorizeBtn = document.getElementById('colorize');
 
 
 const selectedColor = document.getElementById('selectedColor');
@@ -41,6 +41,9 @@ upload.addEventListener('change', function() {
       context.drawImage(image, xOffset, yOffset, ratio.width, ratio.height);
       colorPalette.style.visibility="visible";
       clear.style.visibility="visible";
+      colorizeBtn.style.visibility="visible";
+      uploadLabel.style.visibility="hidden";
+
     };
     image.src = event.target.result;
 
@@ -50,7 +53,6 @@ upload.addEventListener('change', function() {
 });
 }
 
-// Draw on the canvas using the selected color
 function draw() {
   var color = getSelectedColor();
   canvas.addEventListener('mousedown', function(event) {
@@ -72,4 +74,6 @@ function clearCanvas() {
   context.clearRect(0, 0, canvas.width, canvas.height);
   colorPalette.style.visibility="hidden";
   clear.style.visibility="hidden";
+  colorizeBtn.style.visibility="hidden";
+  uploadLabel.style.visibility="visible";
 }

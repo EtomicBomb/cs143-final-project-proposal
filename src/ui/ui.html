@@ -15,13 +15,21 @@
       <canvas id="uploadCanvas" width=100></canvas>
     
       <div id="colorPalette" style="visibility:hidden">
-        <label for="colorPalette" style="color:black">Select a color:</label>   
+        <label for="colorPalette" style="color:black; margin-left:10px">Select a color:</label>   
 
-        <input id="selectedColor" type="color"> <br><br> <br><br> <br><br> <br><br> <br><br>
+        <input id="selectedColor" type="color"> <br><br> <br><br> <br><br> <br><br>
       </div>
-      <label for="upload" class="upload">Upload Image</label>
+      
+     
+      <button id="colorize" class="clear" style="visibility:hidden;margin-left:10px">Colorize!</button>
 
-      <input type="file" id="upload" class="hidden" accept="image/*" >
+
+      <button id = "clear" class="clear" onclick="clearCanvas()" style="visibility:hidden">Restart</button><br><br>
+      <label id = "uploadLabel" for="upload" class="upload">Upload Image</label>
+
+      <input type="file" id="upload" class="hidden" accept="image/*" > <br><br>
+
+
     </fieldset>
     
   
@@ -40,7 +48,7 @@
     <br><br>
 
 
-    <button id = "clear" class="clear" onclick="clearCanvas()" style="visibility:hidden">Restart</button>
+    <!-- <button id = "clear" class="clear" onclick="clearCanvas()" style="visibility:hidden">Restart</button> -->
     <br><br>
     <img id="outputImage">
     <script src="ui.js"></script>

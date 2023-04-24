@@ -71,7 +71,7 @@ legend {
     background: linear-gradient(to right, rgb(145, 2, 158), rgb(211, 144, 238));
     box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
     font-size: 15px;
-    margin-left:20px;
+    margin-left:25px;
 
   }
 
@@ -88,9 +88,7 @@ legend {
     background: linear-gradient(to right, rgb(145, 2, 158), rgb(211, 144, 238));
     box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
     font-size: 15px;
-    margin-left:20px;
-  margin-left:10px;
-  position:absolute;
+  /* position:absolute; */
 }
 
 
