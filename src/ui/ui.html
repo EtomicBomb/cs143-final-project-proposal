@@ -1,0 +1,51 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Interactive Deep Colorization</title>
+    <link rel="stylesheet" href="style.css">
+ 
+  </head>
+  <body>
+    <div class="main">
+    <h1>Interactive Deep Colorization</h1>
+
+    <fieldset class="up" >
+
+      <canvas id="uploadCanvas" width=100></canvas>
+    
+      <div id="colorPalette" style="visibility:hidden">
+        <label for="colorPalette" style="color:black">Select a color:</label>   
+
+        <input id="selectedColor" type="color"> <br><br> <br><br> <br><br> <br><br> <br><br>
+      </div>
+      <label for="upload" class="upload">Upload Image</label>
+
+      <input type="file" id="upload" class="hidden" accept="image/*" >
+    </fieldset>
+    
+  
+
+    <fieldset class="fieldset"><legend>Input Image</legend>
+
+    <canvas id="canvas" width=400 height=350 onclick="draw()"></canvas></fieldset>
+
+
+  
+    <fieldset class="fieldset"><legend>Colorized Output</legend>
+
+    <canvas id="canvasOutput" width=400 height=350></canvas></fieldset>
+    <br><br>
+
+    <br><br>
+
+
+    <button id = "clear" class="clear" onclick="clearCanvas()" style="visibility:hidden">Restart</button>
+    <br><br>
+    <img id="outputImage">
+    <script src="ui.js"></script>
+  </div>
+
+
+  </body>
+</html>
