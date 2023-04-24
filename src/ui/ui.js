@@ -13,6 +13,11 @@ const colorizeBtn = document.getElementById('colorize');
 
 
 const selectedColor = document.getElementById('selectedColor');
+const suggestedColors = document.querySelectorAll('.color');
+const suggestedColorsDiv = document.getElementById('suggestedColors');
+
+
+
 
 const outputImage = document.getElementById('outputImage');
 
@@ -42,6 +47,8 @@ upload.addEventListener('change', function() {
       colorPalette.style.visibility="visible";
       clear.style.visibility="visible";
       colorizeBtn.style.visibility="visible";
+      suggestedColorsDiv.style.visibility="visible";
+
       uploadLabel.style.visibility="hidden";
 
     };
@@ -53,6 +60,9 @@ upload.addEventListener('change', function() {
 });
 }
 
+
+
+
 function draw() {
   var color = getSelectedColor();
   canvas.addEventListener('mousedown', function(event) {
@@ -62,6 +72,23 @@ function draw() {
     context.fillRect(x, y, 5, 5);
   });
 }
+
+function rgbToHex(r, g, b) {
+  return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);}
+
+
+
+suggestedColors.forEach(color => {
+  color.addEventListener('click', () => {
+    let rgb = color.style.background;
+  let r = parseInt(rgb.match(/\d+/g)[0]);
+  let g = parseInt(rgb.match(/\d+/g)[1]);
+  let b = parseInt(rgb.match(/\d+/g)[2]);
+  
+    selectedColor.value=rgbToHex(r,g,b)    
+  });
+});
+
 
 // Get the selected color from the color palette
 function getSelectedColor() {
@@ -75,5 +102,9 @@ function clearCanvas() {
   colorPalette.style.visibility="hidden";
   clear.style.visibility="hidden";
   colorizeBtn.style.visibility="hidden";
+  suggestedColorsDiv.style.visibility="hidden";
+
   uploadLabel.style.visibility="visible";
 }
+
+
