@@ -48,7 +48,23 @@ from util import *
 #    add a final tanh layer on the output, as is common practice when
 #    generating images (Goodfellow et al. 2014; Zhu et al. 2016).
 #
- 
+
+def parse_args():
+    """ Perform command-line argument parsing. """
+
+    parser = argparse.ArgumentParser(
+        description="Let's train some neural nets!",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument(
+        '--task',
+        required=True,
+        choices=['1', '2'],
+        help='''Which task of the assignment to run -
+        training a simple model (1), or training the entire model (2).''')
+
+    return parser.parse_args()
+ARGS = parse_args()
+
 def create_model():
     grey_in = tf.keras.Input(shape=(None, None, 1))
     hint_mask_in = tf.keras.Input(shape=(None, None, 1))
@@ -124,7 +140,7 @@ def create_model():
 
     #the last conv block
     x = tf.keras.layers.Conv2DTranspose(128, kernel_size=(4, 4), strides=(2,2), padding = "same", dilation_rate= 1, activation="relu")(x)
-    x1 = tf.keras.layers.Conv2D(64, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x1)
+    x1 = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x1)
 
     x = x + x1
 
@@ -137,20 +153,55 @@ def create_model():
     x = tf.keras.Model(inputs=(grey_in, hint_mask_in, hint_color_in), outputs=x)
     return x
 
+
+def create_model_simple():
+    grey_in = tf.keras.Input(shape=(None, None, 1))
+    hint_mask_in = tf.keras.Input(shape=(None, None, 1))
+    hint_color_in = tf.keras.Input(shape=(None, None, 2))
+
+    x = tf.concat((grey_in, hint_mask_in, hint_color_in), axis=-1)
+
+    #first block
+    x = tf.keras.layers.Conv2D(64, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    #second block
+    x = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    #third block
+    x = tf.keras.layers.Conv2D(256, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    #fourth block
+    x = tf.keras.layers.Conv2DTranspose(256, kernel_size=(4, 4), strides=(2,2), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    #fifth block
+    x = tf.keras.layers.Conv2DTranspose(128, kernel_size=(4, 4), strides=(2,2), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    #sixth block
+    x = tf.keras.layers.Conv2DTranspose(64, kernel_size=(4, 4), strides=(2,2), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    #last block
+    x = tf.keras.layers.Conv2D(64, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1)(x)
+    x = tf.keras.layers.LeakyReLU(0.2)(x)
+
+    x = tf.keras.layers.Conv2D(2, kernel_size=(1, 1), strides=(1,1), padding = "valid", dilation_rate= 1)(x)
+    x = half_tanh_activation(x)
+
+    x = tf.keras.Model(inputs=(grey_in, hint_mask_in, hint_color_in), outputs=x)
+    return x
+
+
 def half_tanh_activation(x):
     '''
     returns - [-0.5, 0.5]
     '''
     return tf.tanh(x) / 2.0
 
-model = create_model()
-
-model.compile(
-    optimizer=tf.keras.optimizers.Adam(),
-    run_eagerly=True,
-    loss=tf.keras.losses.Huber())
-
-model.summary()
 
 load_weights_from = None
 if load_weights_from is not None:
@@ -159,7 +210,18 @@ if load_weights_from is not None:
 training_data = tf.data.Dataset.load(training_path)
 validation_data = tf.data.Dataset.load(validation_path)
 
-model.fit(
+if ARGS.task == "2":
+    model2 = create_model_simple()
+
+    model2.compile(
+    optimizer=tf.keras.optimizers.Adam(),
+    run_eagerly=True,
+    loss=tf.keras.losses.Huber())
+
+    model2.summary()
+    
+    model = model2
+    model.fit(
     x=training_data,
     validation_data=validation_data,
     epochs=epochs_count,
@@ -176,3 +238,31 @@ model.fit(
             save_best_only=True),
     ],
 )
+if ARGS.task == "1":
+    model1 = create_model()
+
+    model1.compile(
+    optimizer=tf.keras.optimizers.Adam(),
+    run_eagerly=True,
+    loss=tf.keras.losses.Huber())
+
+    model1.summary()
+
+    model = model1
+    model.fit(
+    x=training_data,
+    validation_data=validation_data,
+    epochs=epochs_count,
+    batch_size=None,           
+    callbacks=[
+        tf.keras.callbacks.TensorBoard(
+            log_dir='log/',
+            update_freq='batch',
+            profile_batch=0),
+        tf.keras.callbacks.ModelCheckpoint(
+            filepath='check/{epoch:02d}-{val_loss:.2f}.h5',
+            monitor='val_loss',
+            verbose=1,
+            save_best_only=True),
+    ],
+    )
