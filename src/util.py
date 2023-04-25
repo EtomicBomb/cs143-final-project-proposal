@@ -1,45 +1,13 @@
 from params import *
 import tensorflow as tf
+from hints import *
 
-@tf.function
-def plot_point(accum, elem):
-    hint_mask, hint_colors = accum
-    position, color = elem
-
-    shape = tf.shape(hint_mask)
-    height, width = shape[0], shape[1]
-
-    row, col = position[0], position[1]
-
-    drow = tf.reshape(tf.range(height, dtype=tf.dtypes.float32) - row, (-1, 1, 1))
-    dcol = tf.reshape(tf.range(width, dtype=tf.dtypes.float32) - col, (1, -1, 1))
-    distances = drow**2 + dcol**2
-    mask = distances <= hint_radius**2
-
-    hint_mask |= mask
-    a = tf.where(mask, color, 0)
-    hint_colors += tf.where(mask, color, 0) # plus not right
-    return hint_mask, hint_colors
-
-@tf.function
-def plot_points(height, width, positions, colors): 
+def colorize(grey, points, colors, model):
     '''
-    positions (n, 2) - list of row column values to plot the points
-    colors (n, 2) - uv [0, 1]
-
-    returns - mask (height, width, 1), colors (height, width, 2)
-    '''
-    hint_mask = tf.fill((height, width, 1), False)
-    hint_color = tf.zeros((height, width, 2))
-    hint_mask, hint_color = tf.foldl(plot_point, (positions, colors), initializer=(hint_mask, hint_color))
-    return hint_mask, hint_color    
-
-def colorize(grey, positions, colors, model):
-    '''
-    grey (height, width, 1) y(uv) [0, 1]
-    positions (n, 2)
-    colors (n, 3) rgb [0, 1]
-    model ()
+    grey (height, width, 1) y from yuv [0, 1]
+    points (n, 2)
+    colors (n, 2) rgb [0, 1]
+    model () from tensorflow
 
     returns - (height, width, 3) rgb [0,1]
     '''
@@ -47,7 +15,7 @@ def colorize(grey, positions, colors, model):
     shape = tf.shape(grey)
     height, width = shape[0], shape[1]
 
-    hint_mask, hint_color = plot_points(height, width, positions, colors) 
+    hint_mask, hint_color = create_hints(height, width, points, colors) 
     
     predicted, = model.predict((
         tf.expand_dims(grey, axis=0), 
@@ -55,7 +23,6 @@ def colorize(grey, positions, colors, model):
         tf.expand_dims(hint_color, axis=0),
     ))
     predicted = tf.clip_by_value(predicted, -0.5, 0.5)
-    print(np.min(grey.numpy()), np.max(grey.numpy()))
     predicted = tf.concat((grey, predicted), axis=-1)
 
     return predicted
@@ -70,7 +37,7 @@ if __name__ == '__main__':
 
 
     # input can come from numpy, memory, anywhere
-    image = imread('/home/ethan/Pictures/lisa.jpeg')
+    image = imread('flower.jpg')
     image = img_as_float32(image)
     image = resize(image, (image_height, image_width, 3), anti_aliasing=True)
 
@@ -78,7 +45,7 @@ if __name__ == '__main__':
         [10,20],
         [20,50],
         [120,120],
-    ], dtype=np.float32)
+    ], dtype=np.int32)
 
     colors = np.array([
         [0, 23, 50],
@@ -86,7 +53,7 @@ if __name__ == '__main__':
         [323, 23, 50],
     ], dtype=np.float32)
 
-    model = tf.keras.models.load_model('check/01-0.01.h5')
+    model = tf.keras.models.load_model('check/01-0.03.h5')
 
     # convert before giving to colorize
 
@@ -103,5 +70,3 @@ if __name__ == '__main__':
 
     imgplot = plt.imshow(predicted)
     plt.show()
-
-    imshow(predicted)
