@@ -42,15 +42,17 @@ if __name__ == '__main__':
     image = resize(image, (image_height, image_width, 3), anti_aliasing=True)
 
     points = [
-        [10,20],
-        [20,50],
-        [120,120],
+        [50,50],
+        [20,20],
+        [223,223],
+        [223,210],
     ]
 
     colors = [
-        [0, 23, 50],
-        [500, 23, 50],
-        [323, 23, 50],
+        [255, 255, 0],
+        [200, 23, 50],
+        [200, 23, 50],
+        [0, 23, 200],
     ]
 
     model = tf.keras.models.load_model('check/01-0.03.h5')
@@ -62,7 +64,7 @@ if __name__ == '__main__':
 
     points = tf.cast(points, tf.dtypes.int32)
 
-    colors = tf.cast(colors, tf.dtypes.float32)
+    colors = tf.cast(colors, tf.dtypes.float32) / 255.0
     colors = tf.image.rgb_to_yuv(colors)
     colors = colors[:,1:]
 
