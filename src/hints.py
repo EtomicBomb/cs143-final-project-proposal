@@ -11,7 +11,7 @@ def create_hints_flat(hint_mask, channel):
     '''
     channel = tf.reshape(channel, (1, 1, -1))
     channel = tf.where(hint_mask, channel, 0)
-    channel = tf.reduce_max(channel, axis=-1)
+    channel = tf.reduce_sum(channel, axis=-1)
     return channel
 
 @tf.function
@@ -30,15 +30,17 @@ def create_hints(height, width, points, colors):
     rows = tf.reshape(rows, (1, 1, -1))
     cols = tf.reshape(cols, (1, 1, -1))
 
-    drow = tf.reshape(tf.range(width, dtype=tf.dtypes.int32), (1, -1, 1))
-    dcol = tf.reshape(tf.range(height, dtype=tf.dtypes.int32), (-1, 1, 1))
-    hint_mask = (drow == rows) & (dcol == cols)
+
+    drow = tf.reshape(tf.range(width), (1, -1, 1))
+    dcol = tf.reshape(tf.range(height), (-1, 1, 1))
+    # this is confusing me, but drow has values ranging from (0, width), and so does cols
+    hint_mask = (drow == cols) & (dcol == rows)
 
     u, v = colors[:,0], colors[:,1]
     hint_u = create_hints_flat(hint_mask, u)
     hint_v = create_hints_flat(hint_mask, v)
     hint_color = tf.stack((hint_u, hint_v), axis=-1)
-    hint_mask = tf.reduce_any(hint_mask, axis=-1)
+    hint_mask = tf.reduce_any(hint_mask, axis=-1, keepdims=True)
     return hint_mask, hint_color
 
 @tf.function
@@ -59,10 +61,10 @@ def sample_flat(image, points, sample_var):
     cols = tf.reshape(cols, (1, 1, -1))
 
     drow = tf.reshape(tf.range(width, dtype=tf.dtypes.float32), (1, -1, 1))
-    grow = tf.exp(-(0.5/sample_var) * tf.square(drow-rows))
+    grow = tf.exp((-0.5/sample_var) * tf.square(drow-cols))
 
     dcol = tf.reshape(tf.range(height, dtype=tf.dtypes.float32), (-1, 1, 1))
-    gcol = tf.exp(-(0.5/sample_var) * tf.square(dcol-cols))
+    gcol = tf.exp((-0.5/sample_var) * tf.square(dcol-rows))
 
     sample = grow * gcol
 
@@ -85,33 +87,33 @@ def sample(image, points, sample_var):
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
+    import numpy as np
 
-    points = tf.constant([
-        [1, 2],
-        [30, 40],
-        [50, 60],
-        [0, 4],
-    ], dtype=tf.dtypes.int32)
+    image_height = 400 
+    image_width = 300 
+    num_points = 200
+    hint_sample_variance = 9
 
-    colors = tf.constant([
-        [0.3, 0.9],
-        [0.5, 0.5],
-        [.2, 0.2],
-        [1., 1.],
-    ], dtype=tf.dtypes.float32)
+    image = 'flower.jpg'
+    image = tf.io.read_file(image)
+    image = tf.io.decode_image(image, expand_animations=False, channels=3, dtype=tf.dtypes.float32)
+    image =  tf.image.resize(image, (image_height, image_width))
+    image = tf.image.rgb_to_yuv(image)
+    grey = image[:,:,:1]
+    color = image[:,:,1:]
 
-    sample_var = 4
-    width = 100
-    height = 100
+    rng = tf.random.Generator.from_seed(0)
+    points_rows = rng.uniform((num_points, 1), minval=0, maxval=image_height, dtype=tf.dtypes.int32)
+    points_cols = rng.uniform((num_points, 1), minval=0, maxval=image_width, dtype=tf.dtypes.int32)
+    points = tf.concat((points_rows, points_cols), axis=-1)
 
-    hint_mask, color_hint = create_hints(height, width, points, colors)
-    color_hint = tf.concat((color_hint, tf.fill((height, width, 1), 0.5)), axis=-1)
-    plt.imshow(color_hint)
-    plt.show()
+    colors = sample(color, points, hint_sample_variance)
+
+    hint_mask, color_hint = create_hints(image_height, image_width, points, colors)
+    reconstruction = tf.concat((grey, color_hint), axis=-1)
+    reconstruction = tf.image.yuv_to_rgb(reconstruction)
+
     plt.imshow(tf.cast(hint_mask, tf.dtypes.float32))
     plt.show()
-
-    u = tf.fill((height, width, 1), 0.5)
-    v = tf.fill((height, width, 1), 0.0)
-    image = tf.concat((u, v), axis=-1)
-    print(sample(image, points, sample_var))
+    plt.imshow(reconstruction)
+    plt.show()

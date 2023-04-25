@@ -9,7 +9,7 @@ def colorize(grey, points, colors, model):
     colors (n, 2) uv from yuv [0, 1]
     model () from tensorflow
 
-    returns - (height, width, 3) rgb [0,1]
+    returns - (height, width, 3) yuv [0,1]
     '''
 
     shape = tf.shape(grey)
@@ -42,20 +42,20 @@ if __name__ == '__main__':
     image = resize(image, (image_height, image_width, 3), anti_aliasing=True)
 
     points = [
-        [50,50],
         [20,20],
-        [223,223],
+        [50,50],
         [223,210],
+        [223,223],
     ]
 
     colors = [
+        [255, 0, 0],
+        [0, 255, 0],
+        [0, 0, 255],
         [255, 255, 0],
-        [200, 23, 50],
-        [200, 23, 50],
-        [0, 23, 200],
     ]
 
-    model = tf.keras.models.load_model('check/01-0.03.h5')
+    model = tf.keras.models.load_model('check/01-0.01.h5')
 
     # convert before giving to colorize
 
@@ -64,14 +64,15 @@ if __name__ == '__main__':
 
     points = tf.cast(points, tf.dtypes.int32)
 
-    colors = tf.cast(colors, tf.dtypes.float32) / 255.0
-    colors = tf.image.rgb_to_yuv(colors)
+    colors = tf.cast(colors, tf.dtypes.float32)
+    colors = tf.image.rgb_to_yuv(colors / 255.0)
     colors = colors[:,1:]
 
     predicted = colorize(image, points, colors, model)
 
     predicted = tf.image.yuv_to_rgb(predicted)
     predicted = predicted.numpy()
+    # predicted rgb in [0, 1]
 
     imgplot = plt.imshow(predicted)
     plt.show()
