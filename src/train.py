@@ -207,7 +207,7 @@ def create_model_simplest():
     x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
 
     #sixth block
-    x = tf.keras.layers.Conv2DTranspose(64, kernel_size=(4, 4), strides=(2,2), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.Conv2DTranspose(64, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
     x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
 
     #last block
