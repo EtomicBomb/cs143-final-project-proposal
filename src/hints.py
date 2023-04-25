@@ -11,7 +11,7 @@ def create_hints_flat(hint_mask, channel):
     '''
     channel = tf.reshape(channel, (1, 1, -1))
     channel = tf.where(hint_mask, channel, 0)
-    channel = tf.reduce_sum(channel, axis=-1)
+    channel = tf.reduce_sum(channel, axis=-1) # shouldn't be reduce sum
     return channel
 
 @tf.function
@@ -29,7 +29,6 @@ def create_hints(height, width, points, colors):
     rows, cols = points[:,0], points[:,1]
     rows = tf.reshape(rows, (1, 1, -1))
     cols = tf.reshape(cols, (1, 1, -1))
-
 
     drow = tf.reshape(tf.range(width), (1, -1, 1))
     dcol = tf.reshape(tf.range(height), (-1, 1, 1))
