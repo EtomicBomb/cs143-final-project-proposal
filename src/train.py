@@ -121,7 +121,7 @@ def create_model():
 
     #the last conv block
     x = tf.keras.layers.Conv2DTranspose(128, kernel_size=(4, 4), strides=(2,2), padding = "same", dilation_rate= 1, activation="relu")(x)
-    x1 = tf.keras.layers.Conv2D(64, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x1)
+    x1 = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x1)
 
     x = x + x1
 

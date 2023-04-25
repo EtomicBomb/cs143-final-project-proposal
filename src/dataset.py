@@ -7,7 +7,7 @@ import glob
 rng = tf.random.Generator.from_seed(0)
 
 @tf.function
-def sample_geometric(rng, prob, rng):
+def sample_geometric(rng, prob):
     geometric =  tfp.distributions.Geometric(probs=prob)
     num_points_seed = rng.uniform_full_int((2,), dtype=tf.dtypes.int32)
     num_points = geometric.sample(sample_shape=(), seed=num_points_seed)
@@ -26,7 +26,7 @@ def path_to_training_example(image):
     shape = tf.shape(image)
     height, width = shape[0], shape[1]
 
-    num_points = sample_geometric(rng, hint_points_prob, rng)
+    num_points = sample_geometric(rng, hint_points_prob)
     points_rows = rng.uniform((num_points, 1), minval=0, maxval=height, dtype=tf.dtypes.int32)
     points_cols = rng.uniform((num_points, 1), minval=0, maxval=width, dtype=tf.dtypes.int32)
     points = tf.concat((points_rows, points_cols), axis=-1)
