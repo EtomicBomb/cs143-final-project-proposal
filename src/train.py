@@ -64,12 +64,14 @@ def create_model():
     x1 = x
 
     #second conv block
+    x = x[:,:,::2,::2]
     x = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
     x = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
     x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
     x2 = x
 
     #3rd conv block
+    x = x[:,:,::2,::2]
     x = tf.keras.layers.Conv2D(256, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
     x = tf.keras.layers.Conv2D(256, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
     x = tf.keras.layers.Conv2D(256, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
@@ -77,6 +79,7 @@ def create_model():
     x3 = x
 
     #the 4th conv block
+    x = x[:,:,::2,::2]
     x = tf.keras.layers.Conv2D(512, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
     x = tf.keras.layers.Conv2D(512, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
     x = tf.keras.layers.Conv2D(512, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
