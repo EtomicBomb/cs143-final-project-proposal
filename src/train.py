@@ -58,7 +58,7 @@ def parse_args():
     parser.add_argument(
         '--task',
         required=True,
-        choices=['1', '2'],
+        choices=['1', '2', '3'],
         help='''Which task of the assignment to run -
         training a simple model (1), or training the entire model (2).''')
 
@@ -196,12 +196,118 @@ def create_model_simple():
     return x
 
 
+def create_model_small():
+    grey_in = tf.keras.Input(shape=(None, None, 1))
+    hint_mask_in = tf.keras.Input(shape=(None, None, 1))
+    hint_color_in = tf.keras.Input(shape=(None, None, 2))
+
+    x = tf.concat((grey_in, hint_mask_in, hint_color_in), axis=-1)
+    
+
+    #1st conv block
+    x = tf.keras.layers.Conv2D(16, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.Conv2D(16, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+    x1 = x
+
+    #second conv block
+    x = x[:,:,::2,::2]
+    x = tf.keras.layers.Conv2D(32, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.Conv2D(32, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+    x2 = x
+
+    #3rd conv block
+    x = x[:,:,::2,::2]
+    x = tf.keras.layers.Conv2D(64, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.Conv2D(64, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.Conv2D(64, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+    x3 = x
+
+    #the 4th conv block
+    x = x[:,:,::2,::2]
+    x = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    #the 5th conv block
+    x = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 2, activation="relu")(x)
+    x = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 2, activation="relu")(x)
+    x = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 2, activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    #the 6th conv block
+    x = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 2, activation="relu")(x)
+    x = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 2, activation="relu")(x)
+    x = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 2, activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    #the 7th conv block
+    x = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x)
+    x = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x)
+    x = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    #the 8th conv block
+    x = tf.keras.layers.Conv2DTranspose(64, kernel_size=(4, 4), strides=(2,2), padding = "same", dilation_rate= 1, activation="relu")(x)
+    x3 = tf.keras.layers.Conv2D(64, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x3)
+
+    x = x + x3
+
+    x = tf.keras.layers.Conv2D(64, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x)
+    x = tf.keras.layers.Conv2D(64, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    #the 9th conv block
+    x = tf.keras.layers.Conv2DTranspose(32, kernel_size=(4, 4), strides=(2,2), padding = "same", dilation_rate= 1, activation="relu")(x)
+    x2 = tf.keras.layers.Conv2D(32, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x2)
+
+    x = x + x2
+
+    x = tf.keras.layers.Conv2D(32, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    #the last conv block
+    x = tf.keras.layers.Conv2DTranspose(32, kernel_size=(4, 4), strides=(2,2), padding = "same", dilation_rate= 1, activation="relu")(x)
+    x1 = tf.keras.layers.Conv2D(32, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x1)
+
+    x = x + x1
+
+    x = tf.keras.layers.Conv2D(32, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1)(x)
+    x = tf.keras.layers.LeakyReLU(0.2)(x)
+
+    x = tf.keras.layers.Conv2D(2, kernel_size=(1, 1), strides=(1,1), padding = "valid", dilation_rate= 1)(x)
+    x = half_tanh_activation(x)
+
+    x = tf.keras.Model(inputs=(grey_in, hint_mask_in, hint_color_in), outputs=x)
+    return x
+
+
 def half_tanh_activation(x):
     '''
     returns - [-0.5, 0.5]
     '''
     return tf.tanh(x) / 2.0
 
+
+model = None
+if ARGS.task == "1":
+    model = create_model()
+elif ARGS.task == '2':
+    model = create_model_simple()
+elif ARGS.task == '3':
+    model = create_model_small() 
+else:
+    raise ValueError('bad model number')
+
+model.compile(
+    optimizer=tf.keras.optimizers.Adam(),
+    run_eagerly=True,
+    loss=tf.keras.losses.Huber())
+
+model.summary()
 
 load_weights_from = None
 if load_weights_from is not None:
@@ -210,46 +316,7 @@ if load_weights_from is not None:
 training_data = tf.data.Dataset.load(training_path)
 validation_data = tf.data.Dataset.load(validation_path)
 
-if ARGS.task == "2":
-    model2 = create_model_simple()
-
-    model2.compile(
-    optimizer=tf.keras.optimizers.Adam(),
-    run_eagerly=True,
-    loss=tf.keras.losses.Huber())
-
-    model2.summary()
-    
-    model = model2
-    model.fit(
-    x=training_data,
-    validation_data=validation_data,
-    epochs=epochs_count,
-    batch_size=None,           
-    callbacks=[
-        tf.keras.callbacks.TensorBoard(
-            log_dir='log/',
-            update_freq='batch',
-            profile_batch=0),
-        tf.keras.callbacks.ModelCheckpoint(
-            filepath='check/{epoch:02d}-{val_loss:.2f}.h5',
-            monitor='val_loss',
-            verbose=1,
-            save_best_only=True),
-    ],
-)
-if ARGS.task == "1":
-    model1 = create_model()
-
-    model1.compile(
-    optimizer=tf.keras.optimizers.Adam(),
-    run_eagerly=True,
-    loss=tf.keras.losses.Huber())
-
-    model1.summary()
-
-    model = model1
-    model.fit(
+model.fit(
     x=training_data,
     validation_data=validation_data,
     epochs=epochs_count,
