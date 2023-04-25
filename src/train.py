@@ -55,9 +55,83 @@ def create_model():
     hint_color_in = tf.keras.Input(shape=(None, None, 2))
 
     x = tf.concat((grey_in, hint_mask_in, hint_color_in), axis=-1)
-    x = tf.keras.layers.Conv2DTranspose(2, kernel_size=(1, 1), strides=(1,1))(x)
+    
 
-   x = tf.keras.Model(inputs=(grey_in, hint_mask_in, hint_color_in), outputs=x)
+    #1st conv block
+    x = tf.keras.layers.Conv2D(64, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.Conv2D(64, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+    x1 = x
+
+    #second conv block
+    x = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+    x2 = x
+
+    #3rd conv block
+    x = tf.keras.layers.Conv2D(256, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.Conv2D(256, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.Conv2D(256, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+    x3 = x
+
+    #the 4th conv block
+    x = tf.keras.layers.Conv2D(512, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.Conv2D(512, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.Conv2D(512, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    #the 5th conv block
+    x = tf.keras.layers.Conv2D(512, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 2, activation="relu")(x)
+    x = tf.keras.layers.Conv2D(512, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 2, activation="relu")(x)
+    x = tf.keras.layers.Conv2D(512, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 2, activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    #the 6th conv block
+    x = tf.keras.layers.Conv2D(512, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 2, activation="relu")(x)
+    x = tf.keras.layers.Conv2D(512, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 2, activation="relu")(x)
+    x = tf.keras.layers.Conv2D(512, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 2, activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    #the 7th conv block
+    x = tf.keras.layers.Conv2D(512, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x)
+    x = tf.keras.layers.Conv2D(512, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x)
+    x = tf.keras.layers.Conv2D(512, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    #the 8th conv block
+    x = tf.keras.layers.Conv2DTranspose(256, kernel_size=(4, 4), strides=(2,2), padding = "same", dilation_rate= 1, activation="relu")(x)
+    x3 = tf.keras.layers.Conv2D(256, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x3)
+
+    x = x + x3
+
+    x = tf.keras.layers.Conv2D(256, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x)
+    x = tf.keras.layers.Conv2D(256, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    #the 9th conv block
+    x = tf.keras.layers.Conv2DTranspose(128, kernel_size=(4, 4), strides=(2,2), padding = "same", dilation_rate= 1, activation="relu")(x)
+    x2 = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x2)
+
+    x = x + x2
+
+    x = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    #the last conv block
+    x = tf.keras.layers.Conv2DTranspose(128, kernel_size=(4, 4), strides=(2,2), padding = "same", dilation_rate= 1, activation="relu")(x)
+    x1 = tf.keras.layers.Conv2D(64, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1, activation="relu")(x1)
+
+    x = x + x1
+
+    x = tf.keras.layers.Conv2D(128, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1)(x)
+    x = tf.keras.layers.LeakyReLU(0.2)(x)
+
+    x = tf.keras.layers.Conv2D(2, kernel_size=(1, 1), strides=(1,1), padding = "valid", dilation_rate= 1)(x)
+    x = half_tanh_activation(x)
+
+    x = tf.keras.Model(inputs=(grey_in, hint_mask_in, hint_color_in), outputs=x)
     return x
 
 def half_tanh_activation(x):
