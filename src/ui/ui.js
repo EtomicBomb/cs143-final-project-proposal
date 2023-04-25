@@ -1,5 +1,4 @@
 
-// Get the input image and canvas elements
 const upload = document.getElementById('upload');
 upload.onclick = uploadImage();
 const uploadLabel = document.getElementById('uploadLabel');
@@ -7,19 +6,19 @@ const uploadLabel = document.getElementById('uploadLabel');
 const canvas = document.getElementById('canvas');
 const context = canvas.getContext('2d');
 
+const canvasOutput = document.getElementById('canvasOutput');
+const context2 = canvasOutput.getContext('2d');
 
 const clear = document.getElementById('clear');
 const colorizeBtn = document.getElementById('colorize');
-
 
 const selectedColor = document.getElementById('selectedColor');
 const suggestedColors = document.querySelectorAll('.color');
 const suggestedColorsDiv = document.getElementById('suggestedColors');
 
 
-
-
 const outputImage = document.getElementById('outputImage');
+
 
 function calculateAspectRatioFit(srcWidth, srcHeight, maxWidth, maxHeight) {
 
@@ -28,10 +27,16 @@ function calculateAspectRatioFit(srcWidth, srcHeight, maxWidth, maxHeight) {
     return { width: srcWidth*ratio, height: srcHeight*ratio };
  }
 
+var formData = new FormData();
+
 // When an image is selected, display it on the canvas
 function uploadImage() {
 upload.addEventListener('change', function() {
   const file = upload.files[0];
+  formData.append("file", file);
+
+  // console.log(file)
+  // console.log(formData)
   const reader = new FileReader();
   reader.onload = function(event) {
     const image = new Image();
@@ -61,15 +66,17 @@ upload.addEventListener('change', function() {
 }
 
 
-
-
 function draw() {
   var color = getSelectedColor();
   canvas.addEventListener('mousedown', function(event) {
     const x = event.offsetX;
     const y = event.offsetY;
     context.fillStyle = color;
-    context.fillRect(x, y, 5, 5);
+    context.beginPath();
+    context.moveTo(x, y);
+    context.arc(x, y, 2.5, 0, Math.PI * 2, false);
+    context.fill();
+
   });
 }
 
@@ -107,4 +114,40 @@ function clearCanvas() {
   uploadLabel.style.visibility="visible";
 }
 
+
+colorizeBtn.onclick=function() {
+
+
+for (var key of formData.entries()) {
+  console.log(key[0] + ', ' + key[1]);
+}
+
+  fetch('http://127.0.0.1:5000/input_image', {
+    method: 'POST',
+    body: formData,
+    headers: {
+      // 'Content-Type': 'multipart/form-data'
+      // 'Access-Control-Allow-Origin': '*'
+    }
+  
+  })
+
+  .then(response => response.blob())
+.then(data => {
+  
+
+    // context2.drawImage(data, xOffset, yOffset, ratio.width, ratio.height);
+    var img = new Image();
+    img.onload = function() {
+      // canvasOutput.width = img.width;
+      // canvasOutput.height = img.height;
+      var ratio = calculateAspectRatioFit(img.width, img.height, canvasOutput.width, canvasOutput.height);
+      var xOffset = ratio.width < canvasOutput.width ? ((canvasOutput.width - ratio.width) / 2) : 0;
+      var yOffset = ratio.height < canvasOutput.height ? ((canvasOutput.height - ratio.height) / 2) : 0;
+
+      context2.drawImage(img, xOffset, yOffset, ratio.width, ratio.height);
+    };
+    img.src = URL.createObjectURL(data);
+  console.log("haha");
+})};
 
