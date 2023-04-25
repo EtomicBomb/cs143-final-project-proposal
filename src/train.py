@@ -58,7 +58,7 @@ def parse_args():
     parser.add_argument(
         '--task',
         required=True,
-        choices=['1', '2'],
+        choices=['1', '2', '3'],
         help='''Which task of the assignment to run -
         training a simple model (1), or training the entire model (2).''')
 
@@ -196,6 +196,33 @@ def create_model_simple():
     return x
 
 
+def create_model_simplest():
+    grey_in = tf.keras.Input(shape=(None, None, 1))
+    hint_mask_in = tf.keras.Input(shape=(None, None, 1))
+    hint_color_in = tf.keras.Input(shape=(None, None, 2))
+
+    x = tf.concat((grey_in, hint_mask_in, hint_color_in), axis=-1)
+
+    #first block
+    x = tf.keras.layers.Conv2D(64, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    #sixth block
+    x = tf.keras.layers.Conv2DTranspose(64, kernel_size=(4, 4), strides=(2,2), padding = "same", activation="relu")(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    #last block
+    x = tf.keras.layers.Conv2D(64, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1)(x)
+    x = tf.keras.layers.LeakyReLU(0.2)(x)
+
+    x = tf.keras.layers.Conv2D(2, kernel_size=(1, 1), strides=(1,1), padding = "valid", dilation_rate= 1)(x)
+    x = half_tanh_activation(x)
+
+    x = tf.keras.Model(inputs=(grey_in, hint_mask_in, hint_color_in), outputs=x)
+    return x
+
+
+
 def half_tanh_activation(x):
     '''
     returns - [-0.5, 0.5]
@@ -240,6 +267,34 @@ if ARGS.task == "2":
 )
 if ARGS.task == "1":
     model1 = create_model()
+
+    model1.compile(
+    optimizer=tf.keras.optimizers.Adam(),
+    run_eagerly=True,
+    loss=tf.keras.losses.Huber())
+
+    model1.summary()
+
+    model = model1
+    model.fit(
+    x=training_data,
+    validation_data=validation_data,
+    epochs=epochs_count,
+    batch_size=None,           
+    callbacks=[
+        tf.keras.callbacks.TensorBoard(
+            log_dir='log/',
+            update_freq='batch',
+            profile_batch=0),
+        tf.keras.callbacks.ModelCheckpoint(
+            filepath='check/{epoch:02d}-{val_loss:.2f}.h5',
+            monitor='val_loss',
+            verbose=1,
+            save_best_only=True),
+    ],
+    )
+if ARGS.task == "3":
+    model1 = create_model_simplest()
 
     model1.compile(
     optimizer=tf.keras.optimizers.Adam(),
