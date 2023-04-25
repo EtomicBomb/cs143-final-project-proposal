@@ -71,6 +71,9 @@ def sample_flat(image, points, sample_var):
     sampled = tf.reduce_sum(image * sample, axis=(0,1)) / tf.reduce_sum(sample, axis=(0,1))
     return sampled
 
+
+
+
 @tf.function
 def sample(image, points, sample_var): 
     '''
@@ -84,6 +87,27 @@ def sample(image, points, sample_var):
     u_sampled = sample_flat(u, points, sample_var)
     v_sampled = sample_flat(v, points, sample_var)
     return tf.stack((u_sampled, v_sampled), axis=-1)
+
+if __name__ == '__main__':
+    # show sample map
+    import matplotlib.pyplot as plt
+    import numpy as np
+    height, width = 224, 224
+    sample_var = 4
+
+    row = tf.reshape(30.0, (1, 1, -1))
+    col = tf.reshape(80.0, (1, 1, -1))
+
+    drow = tf.reshape(tf.range(width, dtype=tf.dtypes.float32), (1, -1, 1))
+    grow = tf.exp((-0.5/sample_var) * tf.square(drow-col))
+
+    dcol = tf.reshape(tf.range(height, dtype=tf.dtypes.float32), (-1, 1, 1))
+    gcol = tf.exp((-0.5/sample_var) * tf.square(dcol-row))
+
+    sample = grow * gcol
+
+    plt.imshow(sample)
+    plt.show()
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
