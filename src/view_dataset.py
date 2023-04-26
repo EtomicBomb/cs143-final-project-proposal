@@ -6,6 +6,15 @@ dataset = tf.data.Dataset.load(training_path)
 
 for elem in dataset.take(100).unbatch():
     ((grey, hint_mask, hint_color), color) = elem
+    
+#    height, width, _ = grey.shape
+#    assert width == 224 and height == 224
+#
+#    height, width, _ = hint_mask.shape
+#    assert width == 224 and height == 224
+#
+#    height, width, _ = color.shape
+#    assert width == 224 and height == 224
 
     input_image = tf.concat((grey, color), axis=-1)
     input_image = tf.image.yuv_to_rgb(input_image)

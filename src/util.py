@@ -55,7 +55,7 @@ if __name__ == '__main__':
         [255, 255, 0],
     ]
 
-    model = tf.keras.models.load_model('check/12-0.01.h5')
+    model = tf.keras.models.load_model('/home/ethan/school/cs143/final-project/src/check/01-0.01.h5')
 #    model = tf.keras.models.load_model('check/01-0.01.h5')
 
     # convert before giving to colorize

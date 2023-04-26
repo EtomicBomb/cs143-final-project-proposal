@@ -26,29 +26,6 @@ from util import *
     # TODO: should make training data visualization
     # TODO: I improperly handled case where patches overlap
 
-#     onv1-10. In conv1-4,
-#    in every block, feature tensors are progressively halved spatially,
-#    while doubling in the feature dimension. Each block contains 2-3
-#    conv-relu pairs. In the second half, conv7-10, spatial resolution is
-#    recovered, while feature dimensions are halved. In block conv5-6,
-#    instead of halving the spatial resolution, dilated convolutions with
-#    factor 2 is used.  Symmetric shortcut con-
-#    nections are added to help the network recover spatial information
-#     For example, the conv2 and conv3 blocks
-#    are connected to the conv8 and conv9 blocks, respectively. Changes in spatial resolution are achieved using
-#    subsampling or upsampling operations, and each convolution uses
-#    a 3 × 3 kernel. BatchNorm layers are added after each convolutional
-#    block, which has been shown to help training.
-#    A subset of our network architecture, namely conv1-8 without
-#    the shortcut connections, was used by Zhang et al. (2016). For these
-#    layers, we fine-tune from these pre-trained weights. The added
-#    conv9, conv10 layers and shortcut connections are trained from
-#    scratch. A last conv layer, which is a 1 × 1 kernel, maps between
-#    conv10 and the output color. Because the ab gamut is bounded, we
-#    add a final tanh layer on the output, as is common practice when
-#    generating images (Goodfellow et al. 2014; Zhu et al. 2016).
-#
-
 def parse_args():
     """ Perform command-line argument parsing. """
 
@@ -58,12 +35,16 @@ def parse_args():
     parser.add_argument(
         '--task',
         required=True,
-        choices=['1', '2', '3'],
         help='''Which task of the assignment to run -
         training a simple model (1), or training the entire model (2).''')
 
     return parser.parse_args()
-ARGS = parse_args()
+
+def half_tanh_activation(x):
+    '''
+    returns - [-0.5, 0.5]
+    '''
+    return tf.tanh(x) / 2.0
 
 def create_model():
     grey_in = tf.keras.Input(shape=(None, None, 1))
@@ -204,11 +185,11 @@ def create_model_simplest():
 
     #first block
     x = tf.keras.layers.Conv2D(64, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
-    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+#    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
 
     #sixth block
     x = tf.keras.layers.Conv2DTranspose(64, kernel_size=(3, 3), strides=(1,1), padding = "same", activation="relu")(x)
-    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+#    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
 
     #last block
     x = tf.keras.layers.Conv2D(64, kernel_size=(3, 3), strides=(1,1), padding = "same", dilation_rate= 1)(x)
@@ -220,12 +201,141 @@ def create_model_simplest():
     x = tf.keras.Model(inputs=(grey_in, hint_mask_in, hint_color_in), outputs=x)
     return x
 
-def half_tanh_activation(x):
-    '''
-    returns - [-0.5, 0.5]
-    '''
-    return tf.tanh(x) / 2.0
+def create_model_ethan():
+    grey_in = tf.keras.Input(shape=(None, None, 1))
+    hint_mask_in = tf.keras.Input(shape=(None, None, 1))
+    hint_color_in = tf.keras.Input(shape=(None, None, 2))
+    x = tf.concat((grey_in, hint_mask_in, hint_color_in), axis=-1, name='c1')
 
+    # down 
+    x = tf.keras.layers.Conv2D(8, kernel_size=3, strides=1, activation='relu')(x)
+    x = tf.keras.layers.Conv2D(8, kernel_size=3, strides=1, activation='relu')(x)
+    x = tf.keras.layers.Conv2D(8, kernel_size=3, strides=1, activation='relu')(x)
+    x1 = x
+    x = tf.keras.layers.MaxPool2D(pool_size=2)(x)
+
+    # down 
+    x = tf.keras.layers.Conv2D(16, kernel_size=3, strides=1, activation='relu')(x)
+    x = tf.keras.layers.Conv2D(16, kernel_size=3, strides=1, activation='relu')(x)
+    x = tf.keras.layers.Conv2D(16, kernel_size=3, strides=1, activation='relu')(x)
+    x2 = x
+    x = tf.keras.layers.MaxPool2D(pool_size=2)(x)
+
+    # down 
+    x = tf.keras.layers.Conv2D(32, kernel_size=3, strides=1, activation='relu')(x)
+    x = tf.keras.layers.Conv2D(32, kernel_size=3, strides=1, activation='relu')(x)
+    x = tf.keras.layers.Conv2D(32, kernel_size=3, strides=1, activation='relu')(x)
+    x3 = x
+    x = tf.keras.layers.MaxPool2D(pool_size=2)(x)
+
+#    # down 
+#    x = tf.keras.layers.Conv2D(64, kernel_size=3, strides=1, padding='valid', activation='relu')(x)
+#    x = tf.keras.layers.Conv2D(64, kernel_size=3, strides=1, padding='valid', activation='relu')(x)
+#    x = tf.keras.layers.Conv2D(64, kernel_size=3, strides=1, padding='valid', activation='relu')(x)
+#    x4 = x
+#    x = tf.keras.layers.MaxPool2D(pool_size=2)(x)
+#    
+#    # up
+#    x =  tf.keras.layers.UpSampling2D(size=2)(x)
+#    x = tf.concat((x, x4), axis=-1, name='c2')
+#    x = tf.keras.layers.Conv2DTranspose(64, kernel_size=3, strides=1, padding='valid', activation='relu')(x)
+#    x = tf.keras.layers.Conv2DTranspose(64, kernel_size=3, strides=1, padding='valid', activation='relu')(x)
+#    x = tf.keras.layers.Conv2DTranspose(64, kernel_size=3, strides=1, padding='valid', activation='relu')(x)
+
+    # up
+    x =  tf.keras.layers.UpSampling2D(size=2)(x)
+    x = tf.concat((x, x3), axis=-1, name='c2')
+    x = tf.keras.layers.Conv2DTranspose(32, kernel_size=3, strides=1, activation='relu')(x)
+    x = tf.keras.layers.Conv2DTranspose(32, kernel_size=3, strides=1, activation='relu')(x)
+    x = tf.keras.layers.Conv2DTranspose(32, kernel_size=3, strides=1, activation='relu')(x)
+
+    # up
+    x =  tf.keras.layers.UpSampling2D(size=2)(x)
+    x = tf.concat((x, x2), axis=-1)
+    x = tf.keras.layers.Conv2DTranspose(16, kernel_size=3, strides=1, activation='relu')(x)
+    x = tf.keras.layers.Conv2DTranspose(16, kernel_size=3, strides=1, activation='relu')(x)
+    x = tf.keras.layers.Conv2DTranspose(16, kernel_size=3, strides=1, activation='relu')(x)
+
+    # up
+    x =  tf.keras.layers.UpSampling2D(size=2)(x)
+    x = tf.concat((x, x1), axis=-1)
+    x = tf.keras.layers.Conv2DTranspose(16, kernel_size=3, strides=1, activation='relu')(x)
+    x = tf.keras.layers.Conv2DTranspose(16, kernel_size=3, strides=1)(x)
+    x = tf.keras.layers.LeakyReLU(0.2)(x)
+    x = tf.keras.layers.Conv2DTranspose(2, kernel_size=3, strides=1)(x)
+    x = tf.tanh(x) / 2.0
+
+    x = tf.keras.Model(inputs=(grey_in, hint_mask_in, hint_color_in), outputs=x)
+    return x
+
+def create_model_simplest2():
+    grey_in = tf.keras.Input(shape=(None, None, 1))
+    hint_mask_in = tf.keras.Input(shape=(None, None, 1))
+    hint_color_in = tf.keras.Input(shape=(None, None, 2))
+
+    x = tf.concat((grey_in, hint_mask_in, hint_color_in), axis=-1)
+
+    # down
+    x = tf.keras.layers.Conv2D(64, kernel_size=3, strides=1, padding='same', activation='relu')(x)
+    x = tf.keras.layers.Conv2D(64, kernel_size=3, strides=1, padding='same', activation='relu')(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+#    # down
+#    x = tf.keras.layers.Conv2D(64, kernel_size=3, strides=1, activation='relu')(x)
+#    x = tf.keras.layers.Conv2D(64, kernel_size=3, strides=1, activation='relu')(x)
+#    x = tf.keras.layers.Conv2D(64, kernel_size=3, strides=1, activation='relu')(x)
+##    x1 = x
+#    x = tf.keras.layers.MaxPool2D(pool_size=2)(x)
+#    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+#    # up
+#    x =  tf.keras.layers.UpSampling2D(size=2)(x)
+##    x = tf.concat((x, x1), axis=-1, name='c2')
+#    x = tf.keras.layers.Conv2DTranspose(64, kernel_size=3, strides=1, activation='relu')(x)
+#    x = tf.keras.layers.Conv2DTranspose(64, kernel_size=3, strides=1, activation='relu')(x)
+#    x = tf.keras.layers.Conv2DTranspose(64, kernel_size=3, strides=1, activation='relu')(x)
+#    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    # up
+    x = tf.keras.layers.Conv2DTranspose(64, kernel_size=3, strides=1, padding='same', activation='relu')(x)
+    x = tf.keras.layers.Conv2DTranspose(64, kernel_size=3, strides=1, padding='same', activation='relu')(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+
+    # last block
+    x = tf.keras.layers.Conv2D(64, kernel_size=3, strides=1, padding='same', dilation_rate= 1)(x)
+    x = tf.keras.layers.LeakyReLU(0.2)(x)
+
+    x = tf.keras.layers.Conv2D(2, kernel_size=1, strides=1, padding='valid', dilation_rate= 1)(x)
+    x = tf.tanh(x) / 2.0
+
+    x = tf.keras.Model(inputs=(grey_in, hint_mask_in, hint_color_in), outputs=x)
+    return x
+
+#     onv1-10. In conv1-4,
+#    in every block, feature tensors are progressively halved spatially,
+#    while doubling in the feature dimension. Each block contains 2-3
+#    conv-relu pairs. In the second half, conv7-10, spatial resolution is
+#    recovered, while feature dimensions are halved. In block conv5-6,
+#    instead of halving the spatial resolution, dilated convolutions with
+#    factor 2 is used.  Symmetric shortcut con-
+#    nections are added to help the network recover spatial information
+#     For example, the conv2 and conv3 blocks
+#    are connected to the conv8 and conv9 blocks, respectively. Changes in spatial resolution are achieved using
+#    subsampling or upsampling operations, and each convolution uses
+#    a 3 × 3 kernel. BatchNorm layers are added after each convolutional
+#    block, which has been shown to help training.
+#    A subset of our network architecture, namely conv1-8 without
+#    the shortcut connections, was used by Zhang et al. (2016). For these
+#    layers, we fine-tune from these pre-trained weights. The added
+#    conv9, conv10 layers and shortcut connections are trained from
+#    scratch. A last conv layer, which is a 1 × 1 kernel, maps between
+#    conv10 and the output color. Because the ab gamut is bounded, we
+#    add a final tanh layer on the output, as is common practice when
+#    generating images (Goodfellow et al. 2014; Zhu et al. 2016).
+#
+
+
+ARGS = parse_args()
 
 model = None
 if ARGS.task == "1":
@@ -234,6 +344,10 @@ elif ARGS.task == '2':
     model = create_model_simple()
 elif ARGS.task == '3':
     model = create_model_simplest() 
+elif ARGS.task == '4':
+    model = create_model_ethan() 
+elif ARGS.task == '5':
+    model = create_model_simplest2() 
 else:
     raise ValueError('bad model number')
 
@@ -248,7 +362,7 @@ load_weights_from = None
 if load_weights_from is not None:
     model.load_weights(load_weights_from)
 
-training_data = tf.data.Dataset.load(training_path)
+training_data = tf.data.Dataset.load(training_path).rebatch(6) # TODO: undo
 validation_data = tf.data.Dataset.load(validation_path)
 
 model.fit(
@@ -267,32 +381,4 @@ model.fit(
             verbose=1,
             save_best_only=True),
     ],
-    )
-if ARGS.task == "3":
-    model1 = create_model_simplest()
-
-    model1.compile(
-    optimizer=tf.keras.optimizers.Adam(),
-    run_eagerly=True,
-    loss=tf.keras.losses.Huber())
-
-    model1.summary()
-
-    model = model1
-    model.fit(
-    x=training_data,
-    validation_data=validation_data,
-    epochs=epochs_count,
-    batch_size=None,           
-    callbacks=[
-        tf.keras.callbacks.TensorBoard(
-            log_dir='log/',
-            update_freq='batch',
-            profile_batch=0),
-        tf.keras.callbacks.ModelCheckpoint(
-            filepath='check/{epoch:02d}-{val_loss:.2f}.h5',
-            monitor='val_loss',
-            verbose=1,
-            save_best_only=True),
-    ],
-    )
+)

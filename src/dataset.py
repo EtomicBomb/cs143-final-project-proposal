@@ -25,15 +25,21 @@ def path_to_training_example(image):
 
     shape = tf.shape(image)
     height, width = shape[0], shape[1]
+    
+    should_full = rng.uniform(shape=(), minval=0, maxval=1.0, dtype=tf.dtypes.float32)
+    if should_full < 0.05:
+        hint_mask = tf.fill(grey.shape, True)
+        hint_color = color
+        return ((grey, hint_mask, hint_color), color)
+    else:
+        num_points = sample_geometric(rng, hint_points_prob)
+        points_rows = rng.uniform((num_points, 1), minval=0, maxval=height, dtype=tf.dtypes.int32)
+        points_cols = rng.uniform((num_points, 1), minval=0, maxval=width, dtype=tf.dtypes.int32)
+        points = tf.concat((points_rows, points_cols), axis=-1)
 
-    num_points = sample_geometric(rng, hint_points_prob)
-    points_rows = rng.uniform((num_points, 1), minval=0, maxval=height, dtype=tf.dtypes.int32)
-    points_cols = rng.uniform((num_points, 1), minval=0, maxval=width, dtype=tf.dtypes.int32)
-    points = tf.concat((points_rows, points_cols), axis=-1)
-
-    colors = sample(color, points, hint_sample_variance)
-    hint_mask, hint_color = create_hints(height, width, points, colors)
-    return ((grey, hint_mask, hint_color), color)
+        colors = sample(color, points, hint_sample_variance)
+        hint_mask, hint_color = create_hints(height, width, points, colors)
+        return ((grey, hint_mask, hint_color), color)
 
 shuffle_seed = rng.uniform_full_int((), dtype=tf.dtypes.int64)
 
