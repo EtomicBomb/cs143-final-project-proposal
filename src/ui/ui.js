@@ -67,15 +67,45 @@ upload.addEventListener('change', function() {
 
 
 function draw() {
-  var color = getSelectedColor();
   canvas.addEventListener('mousedown', function(event) {
     const x = event.offsetX;
     const y = event.offsetY;
+    var color = getSelectedColor();
     context.fillStyle = color;
     context.beginPath();
     context.moveTo(x, y);
     context.arc(x, y, 2.5, 0, Math.PI * 2, false);
     context.fill();
+    // TODO: ensure x and y are true-to-size and not resized or canvas coefficients
+    formData.append("x", x);
+    formData.append("y", y);
+    formData.append("color", color);
+
+    fetch('http://127.0.0.1:5000/input_image', {
+    method: 'POST',
+    body: formData,
+    headers: {
+      // 'Content-Type': 'multipart/form-data'
+      // 'Access-Control-Allow-Origin': '*'
+    }
+  
+  })
+
+  .then(response => response.blob())
+.then(data => {
+      var img = new Image();
+    img.onload = function() {
+      var ratio = calculateAspectRatioFit(img.width, img.height, canvasOutput.width, canvasOutput.height);
+      var xOffset = ratio.width < canvasOutput.width ? ((canvasOutput.width - ratio.width) / 2) : 0;
+      var yOffset = ratio.height < canvasOutput.height ? ((canvasOutput.height - ratio.height) / 2) : 0;
+
+      context2.drawImage(img, xOffset, yOffset, ratio.width, ratio.height);
+    };
+    img.src = URL.createObjectURL(data);
+  console.log("haha");
+})
+
+    
 
   });
 }
@@ -105,49 +135,14 @@ function getSelectedColor() {
 
 // Clear the canvas
 function clearCanvas() {
-  context.clearRect(0, 0, canvas.width, canvas.height);
-  colorPalette.style.visibility="hidden";
-  clear.style.visibility="hidden";
-  colorizeBtn.style.visibility="hidden";
-  suggestedColorsDiv.style.visibility="hidden";
+  // context.clearRect(0, 0, canvas.width, canvas.height);
+  // context2.clearRect(0, 0, canvas.width, canvas.height);
 
-  uploadLabel.style.visibility="visible";
+  // colorPalette.style.visibility="hidden";
+  // clear.style.visibility="hidden";
+  // colorizeBtn.style.visibility="hidden";
+  // suggestedColorsDiv.style.visibility="hidden";
+
+  // uploadLabel.style.visibility="visible";
+  location.reload()
 }
-
-
-colorizeBtn.onclick=function() {
-
-
-for (var key of formData.entries()) {
-  console.log(key[0] + ', ' + key[1]);
-}
-
-  fetch('http://127.0.0.1:5000/input_image', {
-    method: 'POST',
-    body: formData,
-    headers: {
-      // 'Content-Type': 'multipart/form-data'
-      // 'Access-Control-Allow-Origin': '*'
-    }
-  
-  })
-
-  .then(response => response.blob())
-.then(data => {
-  
-
-    // context2.drawImage(data, xOffset, yOffset, ratio.width, ratio.height);
-    var img = new Image();
-    img.onload = function() {
-      // canvasOutput.width = img.width;
-      // canvasOutput.height = img.height;
-      var ratio = calculateAspectRatioFit(img.width, img.height, canvasOutput.width, canvasOutput.height);
-      var xOffset = ratio.width < canvasOutput.width ? ((canvasOutput.width - ratio.width) / 2) : 0;
-      var yOffset = ratio.height < canvasOutput.height ? ((canvasOutput.height - ratio.height) / 2) : 0;
-
-      context2.drawImage(img, xOffset, yOffset, ratio.width, ratio.height);
-    };
-    img.src = URL.createObjectURL(data);
-  console.log("haha");
-})};
-

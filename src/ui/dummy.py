@@ -1,3 +1,3 @@
 
-def fake_colorize(img):
+def do_nothing(img):
     return img
