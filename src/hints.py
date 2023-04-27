@@ -46,10 +46,6 @@ def create_hints(height, width, points, colors, hint_radius):
     hint_mask = (drow-cols)**2 + (dcol-rows)**2 <= hint_radius**2
     hint_mask = prune_hint_mask(hint_mask)
 
-    a = tf.reduce_max(tf.reduce_sum(tf.cast(hint_mask, tf.int32), axis=-1))
-    if a > 1:
-        tf.print('hello')
-
     u, v = colors[:,0], colors[:,1]
     hint_u = create_hints_flat(hint_mask, u)
     hint_v = create_hints_flat(hint_mask, v)

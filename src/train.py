@@ -6,25 +6,13 @@ import os
 import random
 from datetime import datetime
 import tensorflow as tf
-#from skimage.transform import resize
-#from skimage import img_as_float32
-#from skimage.io import imread
-#from skimage.transform import resize
-#from matplotlib import pyplot as plt
 import numpy as np
 import tensorflow as tf
 
 from params import *
 from util import *
-    # TODO: rest of the U-net
 
-    # TODO: final tanh? activation to limit output to (-0.5, 0.5) (actual tanh from -1 to 1)
-    # TODO: 1% of the time during training, the full color is revealed to the network
-    # TODO: patch size revealed to the network uniformly sampled from area 1-9, with average patch color 
-    # TODO: number of points revealed geometric 1/8
-    # TODO: patch location sampled from normal centered on image center
-    # TODO: should make training data visualization
-    # TODO: I improperly handled case where patches overlap
+# TODO: patch location sampled from normal centered on image center
 
 def parse_args():
     """ Perform command-line argument parsing. """
@@ -277,7 +265,7 @@ def create_model_cool():
     x = tf.keras.layers.Conv2D(64, kernel_size=3, strides=1, padding='same')(x)
     x = tf.keras.layers.GroupNormalization(groups=32)(x)
     x = tf.keras.layers.ReLU()(x)
-    x1 = x
+#    x1 = x
     
     # orange
     x = tf.keras.layers.Conv2D(64, kernel_size=4, strides=2, padding='same')(x)
@@ -316,25 +304,26 @@ def create_model_cool():
     x = tf.keras.layers.Conv2D(512, kernel_size=3, strides=1, padding='same')(x)
     x = tf.keras.layers.GroupNormalization(groups=32)(x)
     x = tf.keras.layers.ReLU()(x)
-#    x4 = x
-#
-#    # orange
-#    x = tf.keras.layers.Conv2D(512, kernel_size=4, strides=2, padding='same')(x)
-#    x = tf.keras.layers.GroupNormalization(groups=32)(x)
-#
-#    # blue
-#    x = tf.keras.layers.Conv2D(1024, kernel_size=3, strides=1, padding='same')(x)
-#    x = tf.keras.layers.GroupNormalization(groups=32)(x)
-#    x = tf.keras.layers.ReLU()(x)
-#    x = tf.keras.layers.Conv2D(1024, kernel_size=3, strides=1, padding='same')(x)
-#    x = tf.keras.layers.GroupNormalization(groups=32)(x)
-#    x = tf.keras.layers.ReLU()(x)
-#
-#    # green
-#    x = tf.keras.layers.Conv2DTranspose(512, kernel_size=4, strides=2, padding='same')(x)
-#    x = tf.keras.layers.GroupNormalization(groups=32)(x)
-#    x = tf.keras.layers.ReLU()(x)
-#
+    x4 = x
+
+    # orange
+    x = tf.keras.layers.Conv2D(512, kernel_size=4, strides=2, padding='same')(x)
+    x = tf.keras.layers.GroupNormalization(groups=32)(x)
+
+    # blue
+    x = tf.keras.layers.Conv2D(512, kernel_size=3, strides=1, padding='same')(x)
+    x = tf.keras.layers.GroupNormalization(groups=32)(x)
+    x = tf.keras.layers.ReLU()(x)
+    x = tf.keras.layers.Conv2D(512, kernel_size=3, strides=1, padding='same')(x)
+    x = tf.keras.layers.GroupNormalization(groups=32)(x)
+    x = tf.keras.layers.ReLU()(x)
+
+
+    # green
+    x = tf.keras.layers.Conv2DTranspose(512, kernel_size=4, strides=2, padding='same')(x)
+    x = tf.keras.layers.GroupNormalization(groups=32)(x)
+    x = tf.keras.layers.ReLU()(x)
+
 #    x = tf.concat((x, x4), axis=-1)
     # blue
     x = tf.keras.layers.Conv2D(512, kernel_size=3, strides=1, padding='same')(x)
@@ -363,7 +352,7 @@ def create_model_cool():
     x = tf.keras.layers.GroupNormalization(groups=32)(x)
     x = tf.keras.layers.ReLU()(x)
 
-    x = tf.concat((x, x2), axis=-1)
+#    x = tf.concat((x, x2), axis=-1)
     # blue
     x = tf.keras.layers.Conv2D(128, kernel_size=3, strides=1, padding='same')(x)
     x = tf.keras.layers.GroupNormalization(groups=32)(x)
@@ -377,7 +366,7 @@ def create_model_cool():
     x = tf.keras.layers.GroupNormalization(groups=32)(x)
     x = tf.keras.layers.ReLU()(x)
 
-    x = tf.concat((x, x1), axis=-1)
+#    x = tf.concat((x, x1), axis=-1)
     # blue
     x = tf.keras.layers.Conv2D(64, kernel_size=3, strides=1, padding='same')(x)
     x = tf.keras.layers.GroupNormalization(groups=32)(x)
@@ -388,7 +377,7 @@ def create_model_cool():
 
     # navy
     x = tf.keras.layers.Conv2D(2, kernel_size=1, strides=1, padding='same')(x)
-    x = tf.tanh(x) / 2.0
+    x = tf.math.sigmoid(x) - 0.5 # output in [-0.5, 0.5]
 
     x = tf.keras.Model(inputs=(grey_in, hint_mask_in, hint_color_in), outputs=x)
     return x
@@ -405,15 +394,32 @@ def create_model_encoder():
     x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
     x = tf.keras.layers.ReLU(negative_slope=slope)(x)
 
+    # down
     x = tf.keras.layers.Conv2D(64, kernel_size=3, strides=1, padding='same', use_bias=False)(x)
     x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
     x = tf.keras.layers.ReLU(negative_slope=slope)(x)
-
     x = tf.keras.layers.MaxPooling2D((2, 2), padding='same')(x)
 
+    # continue
+    x = tf.keras.layers.Conv2D(128, kernel_size=3, strides=1, padding='same', use_bias=False)(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+    x = tf.keras.layers.ReLU(negative_slope=slope)(x)
+
+    # continue
+    x = tf.keras.layers.Conv2D(128, kernel_size=3, strides=1, padding='same', use_bias=False)(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+    x = tf.keras.layers.ReLU(negative_slope=slope)(x)
+
+    # continue
+    x = tf.keras.layers.Conv2D(128, kernel_size=3, strides=1, padding='same', use_bias=False)(x)
+    x = tf.keras.layers.BatchNormalization(axis=-1, momentum=0.99, epsilon=0.001)(x)
+    x = tf.keras.layers.ReLU(negative_slope=slope)(x)
+
+    # up
     x = tf.keras.layers.Conv2DTranspose(64, kernel_size=3, strides=2, padding='same')(x)
     x = tf.keras.layers.ReLU(negative_slope=slope)(x)
     
+    # continue
     x = tf.keras.layers.Conv2DTranspose(64, kernel_size=3, strides=1, padding='same')(x)
     x = tf.keras.layers.ReLU(negative_slope=slope)(x)
 
@@ -423,8 +429,6 @@ def create_model_encoder():
     x = tf.keras.Model(inputs=(grey_in, hint_mask_in, hint_color_in), outputs=x)
     return x
 
-#    x = tf.keras.layers.GroupNormalization(groups=32)(x)
-    
 if model_number == 1:
     model = create_model()
 elif model_number == 2:
@@ -441,7 +445,7 @@ else:
     raise ValueError('bad model number ' + str(model_number))
 
 model.compile(
-    optimizer=tf.keras.optimizers.Adam(learning_rate=0.0001),
+    optimizer=tf.keras.optimizers.Adam(learning_rate=0.00005),
     run_eagerly=True,
     loss=tf.keras.losses.Huber())
 

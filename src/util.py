@@ -35,35 +35,31 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
     # input can come from numpy, memory, anywhere
-#    image = imread('/home/ethan/school/cs143/final-project/src/raw/676120388_28f03069c3.jpg')
-#    image = np.zeros((image_height, image_width, 3))
-#    image = imread('/home/ethan/school/cs143/final-project/src/raw/215798354_429de28c2d.jpg')
-    image = imread('/home/ethan/school/cs143/final-project/src/raw/537625768_791e973b40.jpg')
+    image = imread('flower.jpg')
     image = img_as_float32(image)
     image = resize(image, (image_height, image_width, 3), anti_aliasing=True)
 
     points = [
         [20,20],
         [50,50],
-        [112,112],
         [223,210],
         [223,223],
     ]
 
     colors = [
-        [0, 0, 255],
+        [255, 0, 0],
         [0, 255, 0],
-        [225, 255, 0],
         [0, 0, 255],
         [255, 255, 0],
     ]
 
-    model = tf.keras.models.load_model('check/c.h5')
+    model = tf.keras.models.load_model('check/d.h5')
 
     # convert before giving to colorize
 
     image = tf.image.rgb_to_yuv(image)
 
+#    # feed whole color and predict (for testing)
 #    predicted, = model.predict((
 #        tf.expand_dims(image[:,:,:1], axis=0), 
 #        tf.expand_dims(tf.fill(image[:,:,:1].shape, True), axis=0), 
@@ -72,19 +68,14 @@ if __name__ == '__main__':
 #    predicted = tf.concat((image[:,:,:1], predicted), axis=-1)
 #    predicted = tf.image.yuv_to_rgb(predicted)
 
+    # predict using generated points
     image = image[:,:,:1]
-
     points = tf.cast(points, tf.dtypes.int32)
-
     colors = tf.cast(colors, tf.dtypes.float32)
     colors = tf.image.rgb_to_yuv(colors / 255.0)
     colors = colors[:,1:]
-
     predicted = colorize(image, points, colors, model)
     predicted = tf.image.yuv_to_rgb(predicted)
 
-    predicted = predicted.numpy()
-    # predicted rgb in [0, 1]
-
-    imgplot = plt.imshow(predicted)
+    imgplot = plt.imshow(predicted.numpy())
     plt.show()
