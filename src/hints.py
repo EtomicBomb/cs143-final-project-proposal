@@ -1,6 +1,15 @@
 import tensorflow as tf
 
 @tf.function
+def prune_hint_mask(hint_mask):
+    '''
+    Makes sure there is at most one True value in every channel
+    '''
+    overlap_count = tf.cast(hint_mask, tf.int32)
+    overlap_count = tf.math.cumsum(overlap_count, axis=-1)
+    return hint_mask & (overlap_count < 2)
+
+@tf.function
 def create_hints_flat(hint_mask, channel):
     '''
     hint_mask (height, width, num_points)
@@ -11,11 +20,11 @@ def create_hints_flat(hint_mask, channel):
     '''
     channel = tf.reshape(channel, (1, 1, -1))
     channel = tf.where(hint_mask, channel, 0)
-    channel = tf.reduce_sum(channel, axis=-1) # shouldn't be reduce sum
+    channel = tf.reduce_sum(channel, axis=-1)
     return channel
 
 @tf.function
-def create_hints(height, width, points, colors):
+def create_hints(height, width, points, colors, hint_radius):
     '''
     height - int
     width - int
@@ -33,7 +42,13 @@ def create_hints(height, width, points, colors):
     drow = tf.reshape(tf.range(width), (1, -1, 1))
     dcol = tf.reshape(tf.range(height), (-1, 1, 1))
     # this is confusing me, but drow has values ranging from (0, width), and so does cols
-    hint_mask = (drow == cols) & (dcol == rows)
+#    hint_mask = (drow == cols) & (dcol == rows)
+    hint_mask = (drow-cols)**2 + (dcol-rows)**2 <= hint_radius**2
+    hint_mask = prune_hint_mask(hint_mask)
+
+    a = tf.reduce_max(tf.reduce_sum(tf.cast(hint_mask, tf.int32), axis=-1))
+    if a > 1:
+        tf.print('hello')
 
     u, v = colors[:,0], colors[:,1]
     hint_u = create_hints_flat(hint_mask, u)
@@ -116,6 +131,7 @@ if __name__ == '__main__':
     image_width = 300 
     num_points = 200
     hint_sample_variance = 9
+    hint_radius = 5
 
     image = 'flower.jpg'
     image = tf.io.read_file(image)

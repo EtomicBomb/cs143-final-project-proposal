@@ -15,14 +15,13 @@ def colorize(grey, points, colors, model):
     shape = tf.shape(grey)
     height, width = shape[0], shape[1]
 
-    hint_mask, hint_color = create_hints(height, width, points, colors) 
+    hint_mask, hint_color = create_hints(height, width, points, colors, hint_radius) 
     
     predicted, = model.predict((
         tf.expand_dims(grey, axis=0), 
         tf.expand_dims(hint_mask, axis=0), 
         tf.expand_dims(hint_color, axis=0),
     ))
-    predicted = tf.clip_by_value(predicted, -0.5, 0.5)
     predicted = tf.concat((grey, predicted), axis=-1)
 
     return predicted
@@ -35,9 +34,8 @@ if __name__ == '__main__':
     import numpy as np
     import matplotlib.pyplot as plt
 
-
     # input can come from numpy, memory, anywhere
-    image = imread('flower.jpg')
+    image = imread('/home/ethan/school/cs143/final-project/src/raw/215798354_429de28c2d.jpg')
     image = img_as_float32(image)
     image = resize(image, (image_height, image_width, 3), anti_aliasing=True)
 
@@ -55,23 +53,31 @@ if __name__ == '__main__':
         [255, 255, 0],
     ]
 
-    model = tf.keras.models.load_model('/home/ethan/school/cs143/final-project/src/check/01-0.01.h5')
-#    model = tf.keras.models.load_model('check/01-0.01.h5')
+    model = tf.keras.models.load_model('check/01-0.01.h5')
 
     # convert before giving to colorize
 
     image = tf.image.rgb_to_yuv(image)
-    image = image[:,:,:1]
 
-    points = tf.cast(points, tf.dtypes.int32)
-
-    colors = tf.cast(colors, tf.dtypes.float32)
-    colors = tf.image.rgb_to_yuv(colors / 255.0)
-    colors = colors[:,1:]
-
-    predicted = colorize(image, points, colors, model)
-
+    predicted, = model.predict((
+        tf.expand_dims(image[:,:,:1], axis=0), 
+        tf.expand_dims(tf.fill(image[:,:,:1].shape, True), axis=0), 
+        tf.expand_dims(image[:,:,1:], axis=0),
+    ))
+    predicted = tf.concat((image[:,:,:1], predicted), axis=-1)
     predicted = tf.image.yuv_to_rgb(predicted)
+
+#    image = image[:,:,:1]
+#
+#    points = tf.cast(points, tf.dtypes.int32)
+#
+#    colors = tf.cast(colors, tf.dtypes.float32)
+#    colors = tf.image.rgb_to_yuv(colors / 255.0)
+#    colors = colors[:,1:]
+#
+#    predicted = colorize(image, points, colors, model)
+#    predicted = tf.image.yuv_to_rgb(predicted)
+
     predicted = predicted.numpy()
     # predicted rgb in [0, 1]
 
