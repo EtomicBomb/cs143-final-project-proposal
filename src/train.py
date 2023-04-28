@@ -12,7 +12,8 @@ import tensorflow as tf
 from params import *
 from util import *
 
-# TODO: patch location sampled from normal centered on image center
+'''
+'''
 
 def parse_args():
     """ Perform command-line argument parsing. """
@@ -202,29 +203,6 @@ def create_model_simplest2():
 
     x = tf.keras.Model(inputs=(grey_in, hint_mask_in, hint_color_in), outputs=x)
     return x
-
-#     onv1-10. In conv1-4,
-#    in every block, feature tensors are progressively halved spatially,
-#    while doubling in the feature dimension. Each block contains 2-3
-#    conv-relu pairs. In the second half, conv7-10, spatial resolution is
-#    recovered, while feature dimensions are halved. In block conv5-6,
-#    instead of halving the spatial resolution, dilated convolutions with
-#    factor 2 is used.  Symmetric shortcut con-
-#    nections are added to help the network recover spatial information
-#     For example, the conv2 and conv3 blocks
-#    are connected to the conv8 and conv9 blocks, respectively. Changes in spatial resolution are achieved using
-#    subsampling or upsampling operations, and each convolution uses
-#    a 3 × 3 kernel. BatchNorm layers are added after each convolutional
-#    block, which has been shown to help training.
-#    A subset of our network architecture, namely conv1-8 without
-#    the shortcut connections, was used by Zhang et al. (2016). For these
-#    layers, we fine-tune from these pre-trained weights. The added
-#    conv9, conv10 layers and shortcut connections are trained from
-#    scratch. A last conv layer, which is a 1 × 1 kernel, maps between
-#    conv10 and the output color. Because the ab gamut is bounded, we
-#    add a final tanh layer on the output, as is common practice when
-#    generating images (Goodfellow et al. 2014; Zhu et al. 2016).
-#
 
 def create_model_cool():
     # https://www.mdpi.com/2673-2688/1/4/29/htm
