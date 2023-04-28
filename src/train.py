@@ -198,29 +198,7 @@ def create_model_simplest2():
 
     x = tf.concat((grey_in, hint_mask_in, hint_color_in), axis=-1)
 
-    #first block
-    x = tf.keras.layers.Conv2D(64, kernel_size=3, strides=1, padding = "same", activation="relu")(x)
-    x = tf.keras.layers.GroupNormalization(groups=32)(x)
-
-    #first block
-    x = tf.keras.layers.Conv2D(64, kernel_size=3, strides=1, padding = "same", activation="relu")(x)
-    x = tf.keras.layers.GroupNormalization(groups=32)(x)
-
-    #sixth block
-    x = tf.keras.layers.Conv2DTranspose(64, kernel_size=3, strides=1, padding = "same", activation="relu")(x)
-    x = tf.keras.layers.GroupNormalization(groups=32)(x)
-
-
-    #sixth block
-    x = tf.keras.layers.Conv2DTranspose(64, kernel_size=3, strides=1, padding = "same", activation="relu")(x)
-    x = tf.keras.layers.GroupNormalization(groups=32)(x)
-
-    #last block
-    x = tf.keras.layers.Conv2D(64, kernel_size=3, strides=1, padding = "same", dilation_rate= 1)(x)
-    x = tf.keras.layers.LeakyReLU(0.2)(x)
-
-    x = tf.keras.layers.Conv2D(2, kernel_size=1, strides=1, padding = "valid", dilation_rate= 1)(x)
-    x = half_tanh_activation(x)
+    x = tf.keras.layers.Conv2D(2, kernel_size=1, strides=1, padding = "valid")(x)
 
     x = tf.keras.Model(inputs=(grey_in, hint_mask_in, hint_color_in), outputs=x)
     return x
@@ -429,7 +407,9 @@ def create_model_encoder():
     x = tf.keras.Model(inputs=(grey_in, hint_mask_in, hint_color_in), outputs=x)
     return x
 
-if model_number == 1:
+if model_number == 0:
+    model = tf.keras.models.load_model(load_weights_from)
+elif model_number == 1:
     model = create_model()
 elif model_number == 2:
     model = create_model_simple()
@@ -451,15 +431,12 @@ model.compile(
 
 model.summary()
 
-if load_weights_from is not None:
-    model.load_weights(load_weights_from)
-
 training_data = tf.data.Dataset.load(training_path)
 validation_data = tf.data.Dataset.load(validation_path)
 
 model.fit(
-    x=training_data.rebatch(train_batch_size),
-    validation_data=validation_data,
+    x=training_data.batch(batch_size),
+    validation_data=validation_data.batch(batch_size),
     epochs=epochs_count,
     batch_size=None,           
     callbacks=[
@@ -468,7 +445,7 @@ model.fit(
             update_freq='batch',
             profile_batch=0),
         tf.keras.callbacks.ModelCheckpoint(
-            filepath='check/{epoch:02d}-{val_loss:.2f}.h5',
+            filepath='check/{epoch:02d}-{val_loss:.5f}.h5',
             monitor='val_loss',
             verbose=1,
             save_best_only=True),

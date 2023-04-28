@@ -4,16 +4,6 @@ from params import *
 from util import *
 import glob
 
-rng = tf.random.Generator.from_seed(0)
-
-@tf.function
-def sample_geometric(rng, prob):
-    geometric =  tfp.distributions.Geometric(probs=prob)
-    num_points_seed = rng.uniform_full_int((2,), dtype=tf.int32)
-    num_points = geometric.sample(sample_shape=(), seed=num_points_seed)
-    num_points = tf.cast(num_points, tf.dtypes.int64)
-    return num_points
-
 @tf.function
 def path_to_training_example(image):
     image = tf.io.read_file(image)
@@ -26,34 +16,34 @@ def path_to_training_example(image):
     shape = tf.shape(image)
     height, width = shape[0], shape[1]
     
-    should_expose = rng.uniform(shape=(), minval=0, maxval=1.0, dtype=tf.float32)
+    should_expose = tf.random.uniform(shape=(), minval=0, maxval=1.0, dtype=tf.float32)
     if should_expose < expose_everything_frac:
         hint_mask = tf.fill(grey.shape, True)
         hint_color = color
     else:
-        num_points = sample_geometric(rng, hint_points_prob)
-        points_rows = rng.uniform((num_points, 1), minval=0, maxval=height, dtype=tf.int32)
-        points_cols = rng.uniform((num_points, 1), minval=0, maxval=width, dtype=tf.int32)
+        num_points = tfp.distributions.Geometric(probs=hint_points_prob).sample()
+        num_points = tf.cast(num_points, tf.int64)
+        points_rows = tf.random.uniform((num_points,1), minval=0, maxval=height, dtype=tf.int32)
+        points_cols = tf.random.uniform((num_points,1), minval=0, maxval=width, dtype=tf.int32)
         points = tf.concat((points_rows, points_cols), axis=-1)
 
         colors = sample(color, points, hint_sample_variance)
         hint_mask, hint_color = create_hints(height, width, points, colors, hint_radius)
 
-#    noise = rng.uniform((height, width, 2), minval=-0.5, maxval=0.5, dtype=tf.float32)
-#    hint_color = tf.where(hint_mask, hint_color, noise)
     return ((grey, hint_mask, hint_color), color)
 
-shuffle_seed = rng.uniform_full_int((), dtype=tf.dtypes.int64)
+@tf.function
+def create_dataset(data):
+    data = data.repeat(file_include_times)
+    data = data.map(path_to_training_example)
+    data = data.shuffle(shuffle_buffer_size)
+    return data
 
 data = tf.data.Dataset.list_files(dataset_path)
-data = data.repeat(file_include_times)
-data = data.map(path_to_training_example)
-data = data.shuffle(shuffle_buffer_size, seed=shuffle_seed)
-data = data.batch(data_batch_size)
-
+data = data.shuffle(shuffle_buffer_size)
 validation_count = int(validation_frac * data.cardinality().numpy())
-training_data = data.skip(validation_count)
-training_data.save(training_path)
-validation_data = data.take(validation_count)
-validation_data.save(validation_path)
+create_dataset(data.skip(validation_count)).save(training_path)
+create_dataset(data.take(validation_count)).save(validation_path)
+
+
 

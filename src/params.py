@@ -1,11 +1,10 @@
 training_path = 'data/train'
 validation_path = 'data/validate'
-load_weights_from = None
+load_weights_from = 'check/d.h5'
 model_number = 4
 dataset_path = 'raw/*'
 shuffle_buffer_size = 1000
-data_batch_size = 1
-train_batch_size = 16
+batch_size = 16
 validation_frac = 0.2
 file_include_times = 5
 hint_points_prob = 1.0 / 10.0
