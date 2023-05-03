@@ -10,13 +10,10 @@ def inception_model():
     e_in = Input(shape=(256, 256, 1,))
     e = Conv2D(64, (3,3), activation='relu', padding='same', strides=2)(e_in)
     e = Conv2D(128, (3,3), activation='relu', padding='same')(e)
-    e = BatchNormalization()(e)
     e = Conv2D(128, (3,3), activation='relu', padding='same', strides=2)(e)
     e = Conv2D(256, (3,3), activation='relu', padding='same')(e)
-    e = BatchNormalization()(e)
     e = Conv2D(256, (3,3), activation='relu', padding='same', strides=2)(e)
     e = Conv2D(512, (3,3), activation='relu', padding='same')(e)
-    e = BatchNormalization()(e)
     e = Conv2D(512, (3,3), activation='relu', padding='same')(e)
     e = Conv2D(256, (3,3), activation='relu', padding='same')(e)
 
@@ -28,13 +25,11 @@ def inception_model():
 
     #Decoder
     d = Conv2D(128, (3,3), activation='relu', padding='same')(f)
-    d = BatchNormalization()(d)
     d = UpSampling2D((2, 2))(d)
     d = Conv2D(64, (3,3), activation='relu', padding='same')(d)
     d = UpSampling2D((2, 2))(d)
     d = Conv2D(32, (3,3), activation='relu', padding='same')(d)
     d = Conv2D(16, (3,3), activation='relu', padding='same')(d)
-    d = BatchNormalization()(d)
     d = Conv2D(2, (3, 3), activation='tanh', padding='same')(d)
     d = UpSampling2D((2, 2))(d)
 

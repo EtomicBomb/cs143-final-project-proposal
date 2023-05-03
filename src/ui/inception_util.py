@@ -9,6 +9,8 @@ from keras.preprocessing.image import ImageDataGenerator
 from tensorflow.keras.applications.inception_resnet_v2 import InceptionResNetV2, preprocess_input
 from tensorflow.keras.utils import img_to_array, load_img
 import tensorflow_datasets as tfds
+from sklearn.cluster import KMeans
+from collections import Counter
 
 
 
@@ -67,3 +69,20 @@ def image_a_b_gen(batch_size):
         X_batch = X_batch.reshape(X_batch.shape+(1,))
         Y_batch = lab_batch[:,:,:,1:] / 128
         yield ([X_batch,embed], Y_batch)
+
+
+def get_top_5_colors(lab_img):
+    lab_img = lab_img.reshape((lab_img.shape[0] * lab_img.shape[1], 3))
+    kmeans = KMeans(n_clusters=5)
+    labels = kmeans.fit_predict(lab_img)
+    label_counts = Counter(labels)
+    top_five_labels = label_counts.most_common(5)
+    top_colors = [kmeans.cluster_centers_[l] for l, _ in top_five_labels]
+
+    top_rgb_colors = []
+    for color in top_colors:
+        rgb = lab2rgb(np.reshape(color, (1, 1, 3)))
+        rgb_color_int = np.round(rgb * 255).astype(int)
+        top_rgb_colors.append(rgb_color_int)
+    print(top_rgb_colors)
+    return top_rgb_colors
