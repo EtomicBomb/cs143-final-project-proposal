@@ -11,6 +11,7 @@ from tensorflow.keras.utils import img_to_array, load_img
 import tensorflow_datasets as tfds
 from sklearn.cluster import KMeans
 from collections import Counter
+import inception_params as hp
 
 
 
@@ -30,7 +31,7 @@ datagen = ImageDataGenerator(shear_range=0.2,zoom_range=0.2,rotation_range=20,ho
 
 
 def preprocess_image(img):
-    target_shape = (256, 256, 3)
+    target_shape = (hp.img_size, hp.img_size, 3)
     image = img['image']
     image = tf.image.resize(image, target_shape[:2])
     return image
