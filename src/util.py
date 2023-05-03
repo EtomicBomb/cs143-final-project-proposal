@@ -15,7 +15,7 @@ def colorize(grey, points, colors, model):
     shape = tf.shape(grey)
     height, width = shape[0], shape[1]
 
-    hint_mask, hint_color = create_hints(height, width, points, colors, hint_radius) 
+    hint_mask, hint_color = create_hints(height, width, points, colors, hint_threshold, hint_sample_variance)
     
     predicted, = model.predict((
         tf.expand_dims(grey, axis=0), 
@@ -40,17 +40,17 @@ if __name__ == '__main__':
     image = resize(image, (image_height, image_width, 3), anti_aliasing=True)
 
     points = [
-        [20,20],
-        [50,50],
-        [223,210],
-        [223,223],
+#        [20,20],
+#        [50,50],
+#        [223,210],
+#        [223,223],
     ]
 
     colors = [
-        [255, 0, 0],
-        [0, 255, 0],
-        [0, 0, 255],
-        [255, 255, 0],
+#        [255, 0, 0],
+#        [0, 255, 0],
+#        [0, 0, 255],
+#        [255, 255, 0],
     ]
 
     model = tf.keras.models.load_model('check/d.h5')
@@ -70,7 +70,7 @@ if __name__ == '__main__':
 
     # predict using generated points
     image = image[:,:,:1]
-    points = tf.cast(points, tf.dtypes.int32)
+    points = tf.cast(points, tf.dtypes.float32)
     colors = tf.cast(colors, tf.dtypes.float32)
     colors = tf.image.rgb_to_yuv(colors / 255.0)
     colors = colors[:,1:]

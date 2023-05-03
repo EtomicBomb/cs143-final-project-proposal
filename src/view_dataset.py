@@ -3,7 +3,7 @@ import numpy as np
 from params import *
 import matplotlib.pyplot as plt
 
-dataset = tf.data.Dataset.load(training_path)
+dataset = tf.data.Dataset.load(train_dest)
 
 for elem in dataset.take(100):
     ((grey, hint_mask, hint_color), color) = elem
@@ -16,7 +16,6 @@ for elem in dataset.take(100):
 
     fig, (ax1, ax2, ax3) = plt.subplots(3)
 
-    
     print(np.min(hint_color.numpy()))
     print(np.max(hint_color.numpy()))
     print(np.min(color.numpy()))

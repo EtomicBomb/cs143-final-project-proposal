@@ -23,27 +23,28 @@ def path_to_training_example(image):
     else:
         num_points = tfp.distributions.Geometric(probs=hint_points_prob).sample()
         num_points = tf.cast(num_points, tf.int64)
-        points_rows = tf.random.uniform((num_points,1), minval=0, maxval=height, dtype=tf.int32)
-        points_cols = tf.random.uniform((num_points,1), minval=0, maxval=width, dtype=tf.int32)
-        points = tf.concat((points_rows, points_cols), axis=-1)
+        points = tf.random.normal((num_points, 2), mean=(height/2,width/2), stddev=(height/4,width/4))
+        points = tf.clip_by_value(points, 0, (height, width))
+#        points_rows = tf.random.uniform((num_points,1), minval=0, maxval=height, dtype=tf.int32)
+#        points_cols = tf.random.uniform((num_points,1), minval=0, maxval=width, dtype=tf.int32)
+#        points = tf.concat((points_rows, points_cols), axis=-1)
+#        points = tf.cast(points, dtype=tf.int32)
 
         colors = sample(color, points, hint_sample_variance)
-        hint_mask, hint_color = create_hints(height, width, points, colors, hint_radius)
+        hint_mask, hint_color = create_hints(height, width, points, colors, hint_threshold, hint_sample_variance)
 
     return ((grey, hint_mask, hint_color), color)
 
-@tf.function
-def create_dataset(data):
+def create_dataset(source):
+    data = tf.data.Dataset.list_files(source)
     data = data.repeat(file_include_times)
+    data_count = data.cardinality().numpy()
+    print(data_count)
+    data = data.shuffle(data_count)
     data = data.map(path_to_training_example)
-    data = data.shuffle(shuffle_buffer_size)
     return data
 
-data = tf.data.Dataset.list_files(dataset_path)
-data = data.shuffle(shuffle_buffer_size)
-validation_count = int(validation_frac * data.cardinality().numpy())
-create_dataset(data.skip(validation_count)).save(training_path)
-create_dataset(data.take(validation_count)).save(validation_path)
-
-
-
+if __name__ == '__main__':
+    print('saving dataset to disk')
+    create_dataset(train_source).save(train_dest)
+    create_dataset(test_source).save(test_dest)
