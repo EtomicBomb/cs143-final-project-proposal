@@ -25,7 +25,6 @@ CORS(app)
 
 
 
-
 @app.route('/input_image', methods=['POST', 'GET'])
 def colorize_image():
     data = request.files
@@ -60,7 +59,6 @@ def send_suggested_colors():
     colors_json= json.dumps({'data': tuple_list})
 
     return Response(colors_json, mimetype='application/json')
-
 
 
 

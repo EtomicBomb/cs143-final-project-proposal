@@ -21,22 +21,19 @@ const outputImage = document.getElementById('outputImage');
 
 
 function calculateAspectRatioFit(srcWidth, srcHeight, maxWidth, maxHeight) {
-
     var ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
-
     return { width: srcWidth*ratio, height: srcHeight*ratio };
  }
 
-var formData = new FormData();
+let formData = new FormData();
 
 // When an image is selected, display it on the canvas
+// Upon upload, an API call is made to get the suggested colors for that image
 function uploadImage() {
 upload.addEventListener('change', function() {
   const file = upload.files[0];
   formData.append("file", file);
 
-  // console.log(file)
-  // console.log(formData)
   const reader = new FileReader();
   reader.onload = function(event) {
     const image = new Image();
@@ -67,11 +64,6 @@ upload.addEventListener('change', function() {
   fetch('http://127.0.0.1:5000/suggested_colors', {
     method: 'POST',
     body: formData,
-    headers: {
-      // 'Content-Type': 'multipart/form-data'
-      // 'Access-Control-Allow-Origin': '*'
-    }
-  
   })
 
   .then(response => response.json())
@@ -79,11 +71,10 @@ upload.addEventListener('change', function() {
 
     suggestedColors.forEach(color => {
   
-    let r = arr[i][0];
-    let g = arr[i][1];
-    let b = arr[i][2];
+    let r = Math.max(0, arr[i][0] - 50);
+    let g = Math.max(0, arr[i][1] - 10);
+    let b = Math.min(255, arr[i][2] + 80);
     i = i + 1;
-    
       color.style.background=rgbToHex(r,g,b)    
     });
 console.log(data); console.log("received");})
@@ -92,7 +83,8 @@ console.log(data); console.log("received");})
 });
 }
 
-
+// Draw on canvas
+// Everytime a point is drawn into the picture, an API call is made to send picture, x and y coordinates, and selected color
 function draw() {
   canvas.addEventListener('mousedown', function(event) {
     const x = event.offsetX;
@@ -103,7 +95,8 @@ function draw() {
     context.moveTo(x, y);
     context.arc(x, y, 2.5, 0, Math.PI * 2, false);
     context.fill();
-    // TODO: ensure x and y are true-to-size and not resized or canvas coefficients
+    // TODO: ensure x and y are true-to-size and not resized or canvas coefficients 
+    // TODO: actually models will resize pictures -- instead of rescaling, might need to crop : )
     formData.append("x", x);
     formData.append("y", y);
     formData.append("color", color);
@@ -111,11 +104,6 @@ function draw() {
     fetch('http://127.0.0.1:5000/input_image', {
     method: 'POST',
     body: formData,
-    headers: {
-      // 'Content-Type': 'multipart/form-data'
-      // 'Access-Control-Allow-Origin': '*'
-    }
-  
   })
 
   .then(response => response.blob())
@@ -137,18 +125,18 @@ function draw() {
   });
 }
 
+// Convert color from RGB format to Hex
 function rgbToHex(r, g, b) {
   return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);}
 
 
-
+// Update selected color when a suggested color is selected
 suggestedColors.forEach(color => {
   color.addEventListener('click', () => {
     let rgb = color.style.background;
-  let r = parseInt(rgb.match(/\d+/g)[0]);
-  let g = parseInt(rgb.match(/\d+/g)[1]);
-  let b = parseInt(rgb.match(/\d+/g)[2]);
-  
+    let r = parseInt(rgb.match(/\d+/g)[0]);
+    let g = parseInt(rgb.match(/\d+/g)[1]);
+    let b = parseInt(rgb.match(/\d+/g)[2]);
     selectedColor.value=rgbToHex(r,g,b)    
   });
 });
