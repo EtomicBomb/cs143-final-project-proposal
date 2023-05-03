@@ -85,5 +85,5 @@ def get_top_5_colors(lab_img):
         rgb = lab2rgb(np.reshape(color, (1, 1, 3)))
         rgb_color_int = np.round(rgb * 255).astype(int)
         top_rgb_colors.append(rgb_color_int)
-    print(top_rgb_colors)
+    # print(top_rgb_colors)
     return top_rgb_colors

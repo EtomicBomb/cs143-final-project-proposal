@@ -61,7 +61,34 @@ upload.addEventListener('change', function() {
 
   };
   reader.readAsDataURL(file);
+  let i = 0;
 
+
+  fetch('http://127.0.0.1:5000/suggested_colors', {
+    method: 'POST',
+    body: formData,
+    headers: {
+      // 'Content-Type': 'multipart/form-data'
+      // 'Access-Control-Allow-Origin': '*'
+    }
+  
+  })
+
+  .then(response => response.json())
+  .then(data => {  const arr = data['data'];
+
+    suggestedColors.forEach(color => {
+  
+    let r = arr[i][0];
+    let g = arr[i][1];
+    let b = arr[i][2];
+    i = i + 1;
+    
+      color.style.background=rgbToHex(r,g,b)    
+    });
+console.log(data); console.log("received");})
+
+    
 });
 }
 
