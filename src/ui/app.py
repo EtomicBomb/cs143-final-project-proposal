@@ -17,7 +17,9 @@ from inception import get_suggested_colors
 
 model = tf.keras.models.load_model('../check/g.h5')
 
-app = Flask(__name__)
+app = Flask(__name__, 
+    static_url_path='',
+    static_folder='www')
 CORS(app)
 
 @app.route('/input_image', methods=['POST', 'GET'])
@@ -52,7 +54,6 @@ def colorize_image():
     output.seek(0)
     return send_file(output, mimetype='image/*')
 
-
 @app.route('/suggested_colors', methods=['POST', 'GET'])
 @cross_origin()
 def send_suggested_colors():
@@ -67,7 +68,5 @@ def send_suggested_colors():
 
     return Response(colors_json, mimetype='application/json')
 
-
-
 if __name__ == "__main__":
- app.run(host='127.0.0.1', port=5000, debug=True)
+ app.run(host='0.0.0.0', port=5000, debug=True)

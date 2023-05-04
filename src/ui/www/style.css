@@ -1,0 +1,110 @@
+
+body {
+    background-color:white;
+    font-family: 'Ubuntu', sans-serif;
+  }
+
+h1 {
+    /* text-align:center; */
+    color: black
+}
+
+/* canvas {
+    border: 1px solid black;
+  } */
+
+.fieldset{
+    margin-right:50px;
+    display: inline-block;
+    border: 1px solid darkgray;
+    font-weight: bold;
+}
+
+.up{
+  display: inline-block;
+  border: 0;
+}
+
+legend {
+    /* border: 1px solid #7; */
+    padding: 3px 6px;
+    margin:auto;
+    border-radius: 15px; 
+}
+
+  
+
+.upload {
+    /* background-color: lightcoral; */
+    color: white;
+    padding: 0.5rem;
+    font-family: sans-serif;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    margin-top: 1rem;
+    position:relative;
+    border:none;
+    background: linear-gradient(to right, rgb(145, 2, 158), rgb(211, 144, 238));
+    box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
+    font-size: 15px;
+    margin-left:25px;
+
+  }
+
+
+.clear {
+  color: white;
+    padding: 0.5rem;
+    font-family: sans-serif;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    margin-top: 1rem;
+    position:relative;
+    border:none;
+    background: linear-gradient(to right, rgb(145, 2, 158), rgb(211, 144, 238));
+    box-shadow: 0 0 20px 1px rgba(0, 0, 0, 0.04);
+    font-size: 15px;
+  /* position:absolute; */
+}
+
+
+
+.hidden {
+    display: none;
+  }
+
+legend {
+    color:black;
+  }
+  
+
+
+
+  .suggestedColors {
+    /* display: flex; */
+    margin-left:20px;
+  }
+  
+  .color {
+    width: 15px;
+    height: 15px;
+    border: 1px solid #000;
+    margin-left:8px;
+    float:left;
+  }
+
+  #suggestedColors label {
+    display: block;
+  }
+  
+
+  .lab {
+    display: block;
+    font-weight:bold;
+  }
+  
+  
+  
+  
+  
+  
