@@ -6,7 +6,7 @@ import numpy as np
 def do_nothing(image, points, colors, model):
 #    return tf.constant(image).numpy()
 
-    points = tf.cast(points, tf.int32)
+    points = tf.cast(points, tf.float32)
     image = tf.cast(image, tf.float32)
     image = image / 255.0
     before_height, before_width, _ = image.shape
