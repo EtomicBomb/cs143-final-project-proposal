@@ -1,9 +1,9 @@
-# import tensorflow as tf
+import tensorflow as tf
 
 from flask import Flask, request, Response, jsonify, render_template, send_file
 from PIL import Image, ImageColor
 from flask.templating import render_template
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from werkzeug.datastructures import MultiDict, FileMultiDict
 # from dummy import do_nothing
 import cv2
@@ -18,7 +18,7 @@ sys.path.append('../')
 from dummy import do_nothing
 from inception import get_suggested_colors
 
-
+model = tf.keras.models.load_model('../check/d.h5')
 
 app = Flask(__name__)
 CORS(app)
@@ -26,6 +26,7 @@ CORS(app)
 
 
 @app.route('/input_image', methods=['POST', 'GET'])
+@cross_origin()
 def colorize_image():
     data = request.files
     coords = request.form.get("coords")
@@ -47,17 +48,31 @@ def colorize_image():
     color = request.form["color"]
     #TODO: change to rgb if backend expects rgb
     rgb_color = ImageColor.getcolor(color, "RGB")
- 
+
     file = data['file']
-    img = Image.open(file.stream)
+    image = Image.open(file.stream) 
+
+    print('before', image)
+    image = do_nothing(image, coord_tuples, rgb_color, model)
+    image = Image.fromarray(image)
+    print('after', image)
+
+
     output = io.BytesIO()
-    img.save(output, format='PNG')
+    image.save(output, format='PNG')
     output.seek(0)
-    output=do_nothing(output, coord_tuples, rgb_color)
     return send_file(output, mimetype='image/*')
+
+#    predicted=do_nothing(image, coord_tuples, rgb_color, model)
+#    predicted = Image.fromarray(predicted)
+#    output = io.BytesIO()
+#    output.seek(0)
+#    predicted.save(output, format='PNG')
+#    return send_file(output, mimetype='image/*')
 
 
 @app.route('/suggested_colors', methods=['POST', 'GET'])
+@cross_origin()
 def send_suggested_colors():
     data = request.files
     file = data['file']
