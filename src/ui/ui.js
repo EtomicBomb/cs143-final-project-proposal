@@ -25,7 +25,6 @@ function calculateAspectRatioFit(srcWidth, srcHeight, maxWidth, maxHeight) {
     return { width: srcWidth*ratio, height: srcHeight*ratio };
  }
 
-let formData = new FormData();
 
 // When an image is selected, display it on the canvas
 // Upon upload, an API call is made to get the suggested colors for that image
@@ -82,6 +81,8 @@ console.log(data); console.log("received");})
     
 });
 }
+const formData = new FormData();
+const coords = []
 
 // Draw on canvas
 // Everytime a point is drawn into the picture, an API call is made to send picture, x and y coordinates, and selected color
@@ -89,6 +90,7 @@ function draw() {
   canvas.addEventListener('mousedown', function(event) {
     const x = event.offsetX;
     const y = event.offsetY;
+    coords.push({x:x, y:y})
     var color = getSelectedColor();
     context.fillStyle = color;
     context.beginPath();
@@ -96,9 +98,9 @@ function draw() {
     context.arc(x, y, 2.5, 0, Math.PI * 2, false);
     context.fill();
     // TODO: ensure x and y are true-to-size and not resized or canvas coefficients 
-    // TODO: actually models will resize pictures -- instead of rescaling, might need to crop : )
-    formData.append("x", x);
-    formData.append("y", y);
+    // TODO: actually models will resize pictures -- instead of rescaling, might need to crop : ) -- or not, TBD really
+    formData.set('coords', JSON.stringify(coords));
+    console.log(JSON.stringify(coords))
     formData.append("color", color);
 
     fetch('http://127.0.0.1:5000/input_image', {

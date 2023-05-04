@@ -1,3 +1,3 @@
 
-def do_nothing(img, x, y, color):
+def do_nothing(img, coords, color):
     return img

@@ -28,12 +28,22 @@ CORS(app)
 @app.route('/input_image', methods=['POST', 'GET'])
 def colorize_image():
     data = request.files
-    # print(data)
-    print(request.files['file'])
-    print(request.form["x"])
-    x = request.form["x"]
-    y = request.form["y"]
-     # color is in hex format by default
+    coords = request.form.get("coords")
+
+    # this is a list of dictionaries
+    coords = json.loads(coords)
+
+    # convert to list of tuples (can keep dictionaries too)
+    coord_tuples=[]
+
+    for coord in coords:
+        x = coord['x']
+        y = coord['y']
+        if (x,y) not in coord_tuples:
+            coord_tuples.append((x,y))
+    print(coord_tuples)
+
+    # color is in hex format by default
     color = request.form["color"]
     #TODO: change to rgb if backend expects rgb
     rgb_color = ImageColor.getcolor(color, "RGB")
@@ -43,7 +53,7 @@ def colorize_image():
     output = io.BytesIO()
     img.save(output, format='PNG')
     output.seek(0)
-    output=do_nothing(output, x, y, rgb_color)
+    output=do_nothing(output, coord_tuples, rgb_color)
     return send_file(output, mimetype='image/*')
 
 

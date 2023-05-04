@@ -22,7 +22,9 @@ import inception_params as hp
 
 
 def get_suggested_colors(image):
-    model = keras.models.load_model('inception_model.h5')
+    model = keras.models.load_model('inception_model.h5', compile=False)
+    model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=hp.learning_rate), loss='mse', metrics=['accuracy'])
+
     target_shape = (hp.img_size, hp.img_size, 3)
     # image = img_to_array(image)
     image = tf.image.resize(image, target_shape[:2])    
@@ -44,7 +46,7 @@ def get_suggested_colors(image):
     cur[:,:,0] = color_me_this[0][:,:,0]
     cur[:,:,1:] = output[0]
     colorized = lab2rgb(cur)
-    imsave("result/img_"+str(0)+".png", colorized)
+    # imsave("result/img_"+str(0)+".png", colorized)
     print(get_top_5_colors(cur))
 
     return get_top_5_colors(cur)
