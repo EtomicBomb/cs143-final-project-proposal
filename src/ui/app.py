@@ -15,7 +15,7 @@ sys.path.append('../')
 from dummy import do_nothing, true_do_nothing
 from inception import get_suggested_colors
 
-model = tf.keras.models.load_model('../check/d.h5')
+model = tf.keras.models.load_model('../check/f.h5')
 
 app = Flask(__name__)
 CORS(app)
