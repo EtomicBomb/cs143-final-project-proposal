@@ -20,8 +20,6 @@ model = tf.keras.models.load_model('../check/d.h5')
 app = Flask(__name__)
 CORS(app)
 
-
-
 @app.route('/input_image', methods=['POST', 'GET'])
 @cross_origin()
 def colorize_image():
@@ -30,34 +28,30 @@ def colorize_image():
 
     # this is a list of dictionaries
     coords = json.loads(coords)
+    print('received ', len(coords), 'hints')
 
-    # convert to list of tuples (can keep dictionaries too)
-    hint_tuples=[]
-
+    points = []
+    colors = []
     for coord in coords:
         x = coord['x']
         y = coord['y']
         col = coord['color']
-        # convert col to rgb
         col = ImageColor.getcolor(col, "RGB")
-        if (x,y,col) not in hint_tuples:
-            hint_tuples.append((x,y,col))
-    print(hint_tuples)
+        points.append((x, y))
+        colors.append(col)
 
- 
     file = data['file']
-    image = Image.open(file.stream) 
+    image = Image.open(file.stream)
 
-    # @Ethan, uncomment this once your do_nothing works with the new array
-    # image = do_nothing(image, coord_tuples, rgb_color, model)
-    # image = Image.fromarray(image)
-
+    image = do_nothing(image, points, colors, model)
+    print('finished prediction')
+    image = Image.fromarray(image)
 
     output = io.BytesIO()
     image.save(output, format='PNG')
     output.seek(0)
-    output=true_do_nothing(output, hint_tuples)
     return send_file(output, mimetype='image/*')
+
 
 @app.route('/suggested_colors', methods=['POST', 'GET'])
 @cross_origin()

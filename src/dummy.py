@@ -3,13 +3,8 @@ from util import *
 from params import *
 import numpy as np
 
-def do_nothing(image, points, color, model):
+def do_nothing(image, points, colors, model):
 #    return tf.constant(image).numpy()
-    ##### REMOVE SECTION WHEN COLORS IS ARRAY #####
-    num_points = len(points)
-    colors = tf.reshape(color, (-1, 3))
-    colors = tf.repeat(colors, num_points, axis=0)
-    ##### END SECTION #####
 
     points = tf.cast(points, tf.int32)
     image = tf.cast(image, tf.float32)
@@ -29,7 +24,6 @@ def do_nothing(image, points, color, model):
     predicted = tf.clip_by_value(predicted, 0, 255)
     predicted = tf.cast(predicted, tf.uint8)
     predicted = predicted.numpy()
-    print('finished prediction')
     return predicted
 
 

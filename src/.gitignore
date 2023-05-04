@@ -1,9 +1,10 @@
 /raw/
+/oxford/
 /check/
 /thumb/
 /data/
 /log/
 /inputs.npy
 /outputs.npy
-/__pycache__/
+__pycache__/
 /keys/
