@@ -52,24 +52,14 @@ def colorize_image():
     file = data['file']
     image = Image.open(file.stream) 
 
-    print('before', image)
     image = do_nothing(image, coord_tuples, rgb_color, model)
     image = Image.fromarray(image)
-    print('after', image)
 
 
     output = io.BytesIO()
     image.save(output, format='PNG')
     output.seek(0)
     return send_file(output, mimetype='image/*')
-
-#    predicted=do_nothing(image, coord_tuples, rgb_color, model)
-#    predicted = Image.fromarray(predicted)
-#    output = io.BytesIO()
-#    output.seek(0)
-#    predicted.save(output, format='PNG')
-#    return send_file(output, mimetype='image/*')
-
 
 @app.route('/suggested_colors', methods=['POST', 'GET'])
 @cross_origin()
