@@ -90,8 +90,8 @@ function draw() {
   canvas.addEventListener('mousedown', function(event) {
     const x = event.offsetX;
     const y = event.offsetY;
-    coords.push({x:x, y:y})
     var color = getSelectedColor();
+    coords.push({x:x, y:y, color:color})
     context.fillStyle = color;
     context.beginPath();
     context.moveTo(x, y);
