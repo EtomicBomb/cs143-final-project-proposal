@@ -27,5 +27,10 @@ def do_nothing(image, points, color, model):
     predicted = tf.cast(predicted, tf.uint8)
     predicted = predicted.numpy()
     print('finished prediction')
-
     return predicted
+
+
+def true_do_nothing(img, hints):
+    for hint in hints:
+        print("x=", hint[0], "y=", hint[1], "color=", hint[2])
+    return img
