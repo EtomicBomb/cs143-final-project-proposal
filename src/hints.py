@@ -95,8 +95,18 @@ if __name__ == '__main__':
     sample_var = 4
     num_points = 50
 
-    points = tf.random.normal((num_points, 2), mean=(height/2,width/2), stddev=(height/4,width/4))
-    points = tf.clip_by_value(points, 0, (height, width))
+    points = tf.cast([
+#        [20,20],
+#        [50,50],
+        [65,80],
+#        [223,210],
+#        [50,112],
+#        [175,175],
+    ], dtype=tf.float32)
+
+
+#    points = tf.random.normal((num_points, 2), mean=(height/2,width/2), stddev=(height/4,width/4))
+#    points = tf.clip_by_value(points, 0, (height, width))
     s = make_sample(height, width, points, sample_var)
 
     s = tf.reduce_sum(s, axis=-1)
