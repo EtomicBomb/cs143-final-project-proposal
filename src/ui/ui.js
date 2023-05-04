@@ -86,46 +86,44 @@ const coords = []
 
 // Draw on canvas
 // Everytime a point is drawn into the picture, an API call is made to send picture, x and y coordinates, and selected color
-function draw() {
-  canvas.addEventListener('mousedown', function(event) {
-    const x = event.offsetX;
-    const y = event.offsetY;
-    var color = getSelectedColor();
-    coords.push({x:x, y:y, color:color})
-    context.fillStyle = color;
-    context.beginPath();
-    context.moveTo(x, y);
-    context.arc(x, y, 2.5, 0, Math.PI * 2, false);
-    context.fill();
-    // TODO: ensure x and y are true-to-size and not resized or canvas coefficients 
-    // TODO: actually models will resize pictures -- instead of rescaling, might need to crop : ) -- or not, TBD really
-    formData.set('coords', JSON.stringify(coords));
-    console.log(JSON.stringify(coords))
-    formData.append("color", color);
+canvas.addEventListener('mousedown', function(event) {
+  const x = event.offsetX;
+  const y = event.offsetY;
+  var color = getSelectedColor();
+  coords.push({x:x, y:y, color:color})
+  context.fillStyle = color;
+  context.beginPath();
+  context.moveTo(x, y);
+  context.arc(x, y, 2.5, 0, Math.PI * 2, false);
+  context.fill();
+  // TODO: ensure x and y are true-to-size and not resized or canvas coefficients 
+  // TODO: actually models will resize pictures -- instead of rescaling, might need to crop : ) -- or not, TBD really
+  formData.set('coords', JSON.stringify(coords));
+  console.log(JSON.stringify(coords))
+  formData.append("color", color);
 
-    fetch('http://127.0.0.1:5000/input_image', {
-    method: 'POST',
-    body: formData,
-  })
-
-  .then(response => response.blob())
-.then(data => {
-      var img = new Image();
-    img.onload = function() {
-      var ratio = calculateAspectRatioFit(img.width, img.height, canvasOutput.width, canvasOutput.height);
-      var xOffset = ratio.width < canvasOutput.width ? ((canvasOutput.width - ratio.width) / 2) : 0;
-      var yOffset = ratio.height < canvasOutput.height ? ((canvasOutput.height - ratio.height) / 2) : 0;
-
-      context2.drawImage(img, xOffset, yOffset, ratio.width, ratio.height);
-    };
-    img.src = URL.createObjectURL(data);
-  console.log("haha");
+  fetch('http://127.0.0.1:5000/input_image', {
+  method: 'POST',
+  body: formData,
 })
 
-    
+.then(response => response.blob())
+.then(data => {
+    var img = new Image();
+  img.onload = function() {
+    var ratio = calculateAspectRatioFit(img.width, img.height, canvasOutput.width, canvasOutput.height);
+    var xOffset = ratio.width < canvasOutput.width ? ((canvasOutput.width - ratio.width) / 2) : 0;
+    var yOffset = ratio.height < canvasOutput.height ? ((canvasOutput.height - ratio.height) / 2) : 0;
 
-  });
-}
+    context2.drawImage(img, xOffset, yOffset, ratio.width, ratio.height);
+  };
+  img.src = URL.createObjectURL(data);
+console.log("haha");
+})
+
+  
+
+});
 
 // Convert color from RGB format to Hex
 function rgbToHex(r, g, b) {
