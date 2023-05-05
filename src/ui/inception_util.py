@@ -37,7 +37,7 @@ def preprocess_image(img):
     return image
 
 def get_train_data():
-    ds = tfds.load('imagenette', split='train')
+    ds = tfds.load('tf_flowers', split='train')
     ds = ds.map(preprocess_image)
 
     # Create an array from the dataset

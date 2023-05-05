@@ -70,9 +70,9 @@ upload.addEventListener('change', function() {
 
     suggestedColors.forEach(color => {
   
-    let r = Math.max(0, arr[i][0] - 50);
-    let g = Math.max(0, arr[i][1] - 10);
-    let b = Math.min(255, arr[i][2] + 80);
+    let r = arr[i][0];
+    let g = arr[i][1];
+    let b = arr[i][2];
     i = i + 1;
       color.style.background=rgbToHex(r,g,b)    
     });
@@ -118,7 +118,6 @@ canvas.addEventListener('mousedown', function(event) {
     context2.drawImage(img, xOffset, yOffset, ratio.width, ratio.height);
   };
   img.src = URL.createObjectURL(data);
-console.log("haha");
 })
 
   
