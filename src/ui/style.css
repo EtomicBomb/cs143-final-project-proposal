@@ -23,6 +23,9 @@ h1 {
 .up{
   display: inline-block;
   border: 0;
+  margin-left:110px;
+  margin-right:40px;
+
 }
 
 legend {
@@ -103,7 +106,27 @@ legend {
     font-weight:bold;
   }
   
+  .center {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* .main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  } */
   
+  .header {
+    /* margin-bottom:0px;
+    margin-left:550px; */
+  }
+
+  .p1 {
+    font-family: Arial, sans-serif;
+  }
   
   
   

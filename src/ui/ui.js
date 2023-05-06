@@ -96,8 +96,7 @@ canvas.addEventListener('mousedown', function(event) {
   context.moveTo(x, y);
   context.arc(x, y, 2.5, 0, Math.PI * 2, false);
   context.fill();
-  // TODO: ensure x and y are true-to-size and not resized or canvas coefficients 
-  // TODO: actually models will resize pictures -- instead of rescaling, might need to crop : ) -- or not, TBD really
+
   formData.set('coords', JSON.stringify(coords));
   console.log(JSON.stringify(coords))
   formData.append("color", color);
@@ -120,9 +119,30 @@ canvas.addEventListener('mousedown', function(event) {
   img.src = URL.createObjectURL(data);
 })
 
-  
-
 });
+
+
+function do_something(){fetch('http://127.0.0.1:5000/inception_image', {
+  method: 'POST',
+  body: formData,
+})
+
+.then(response => response.blob())
+.then(data => {
+    var img = new Image();
+  img.onload = function() {
+    var ratio = calculateAspectRatioFit(img.width, img.height, canvasOutput.width, canvasOutput.height);
+    var xOffset = ratio.width < canvasOutput.width ? ((canvasOutput.width - ratio.width) / 2) : 0;
+    var yOffset = ratio.height < canvasOutput.height ? ((canvasOutput.height - ratio.height) / 2) : 0;
+
+    context2.drawImage(img, xOffset, yOffset, ratio.width, ratio.height);
+  };
+  img.src = URL.createObjectURL(data);
+})}
+
+
+
+
 
 // Convert color from RGB format to Hex
 function rgbToHex(r, g, b) {

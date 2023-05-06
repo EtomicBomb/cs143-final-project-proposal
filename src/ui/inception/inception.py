@@ -15,8 +15,6 @@ import cv2
 
 def get_suggested_colors(image):
     model = keras.models.load_model('800_inception_model.h5')
-    # model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=hp.learning_rate), loss='mse', metrics=['accuracy'])
-
     target_shape = (hp.img_size, hp.img_size, 3)
 
     # test_data=tfds.load("tf_flowers", split="train")
@@ -70,6 +68,42 @@ def get_suggested_colors(image):
 
 
 
+def get_colorized_inception(image):
+    model = keras.models.load_model('800_inception_model.h5')
+    target_shape = (hp.img_size, hp.img_size, 3)
 
+    image = img_to_array(image)
+    ori_shape=image.shape[:2]
+    image = image.astype(np.uint8)
+    # increase image brightness
+    gamma = 1.5
+    inv_gamma = 1.0 / gamma
+    lut = np.array([((i / 255.0) ** inv_gamma) * 255 for i in np.arange(0, 256)]).astype(np.uint8)
+    image = cv2.LUT(image, lut)
+    image = tf.image.resize(image, target_shape[:2])    
+    color_me_this = []
+    color_me_this.append(img_to_array(image))
+    color_me_this = np.array(color_me_this, dtype=float)
+    gray_me = gray2rgb(rgb2gray(1.0/255*color_me_this))
+    color_me_embed = create_inception_embedding(gray_me)
+    color_me_this = rgb2lab(1.0/255*color_me_this)[:,:,:,0]
+    color_me_this = color_me_this.reshape(color_me_this.shape+(1,))
+
+
+    # Test model
+    output = model.predict([color_me_this, color_me_embed])
+    output = output * 128
+
+
+    for i in range(len(output)):
+        cur = np.zeros((256, 256, 3))
+        cur[:,:,0] = color_me_this[i][:,:,0]
+        cur[:,:,1:] = output[i]
+        colorized = lab2rgb(cur)
+        colorized_uint8 = (255 * colorized).astype(np.uint8)
+        colorized_uint8=tf.image.resize(colorized_uint8, ori_shape) 
+        # imsave("result/img_"+str(i)+".png", colorized_uint8)
+
+        return colorized_uint8
 
 

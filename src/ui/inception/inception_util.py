@@ -15,14 +15,6 @@ import inception_params as hp
 
 
 
-# X = []
-# for filename in os.listdir('Train/'):
-#     img = load_img('Train/' + filename)
-#     resized_img = img.resize(target_shape[:2])
-#     array_img = img_to_array(resized_img)
-#     X.append(array_img)
-# X = np.array(X, dtype=float)
-
 
 inception = InceptionResNetV2(weights='imagenet', include_top=True)
 datagen = ImageDataGenerator(shear_range=0.2,zoom_range=0.2,rotation_range=20,horizontal_flip=True, width_shift_range=0.2,
@@ -45,10 +37,10 @@ def get_train_data():
     for i in ds:
         X.append(img_to_array(i))
     X = np.array(X, dtype=float)
-    Xtrain = 1.0/255*X
-    return Xtrain
+    train_data = 1.0/255*X
+    return train_data
 
-
+# Source: https://blog.floydhub.com/colorizing-b-w-photos-with-neural-networks/
 def create_inception_embedding(grayscaled_rgb):
     grayscaled_rgb_resized = []
     for i in grayscaled_rgb:
@@ -59,7 +51,7 @@ def create_inception_embedding(grayscaled_rgb):
     embed = inception(grayscaled_rgb_resized)
     return embed
 
-
+# Source: https://blog.floydhub.com/colorizing-b-w-photos-with-neural-networks/
 def image_a_b_gen(batch_size):
     # Image transformer
     for batch in datagen.flow(get_train_data(), batch_size=batch_size):

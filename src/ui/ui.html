@@ -4,11 +4,22 @@
   <head>
     <title>Color Me This!</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="logo_text.png" type="image/png">
+
+    
+
  
   </head>
   <body>
+    <div class = "header">
+      <img src="logo_text.png" height="100" width="auto" class="center">
+
+    </div>
     <div class="main">
-    <h1 style="text-align: left">Color Me This!</h1>
+
+
+
+
 
     <fieldset class="up" >
 
@@ -35,7 +46,7 @@
 
       
      
-      <button id="colorize" class="clear" style="visibility:hidden;margin-left:10px">Colorize!</button>
+      <button id="colorize" class="clear" style="visibility:hidden;margin-left:10px" onclick="do_something()">Colorize!</button>
 
 
       <button id = "clear" class="clear" onclick="clearCanvas()" style="visibility:hidden;margin-right:15px">Restart</button><br><br>
@@ -59,18 +70,13 @@
     <canvas id="canvasOutput" width=400 height=350></canvas>
     <img id="outputImage" src="">
 
-    <!-- <form action="{{ url_for('upload_file') }}" enctype="multipart/form-data" method="POST">
-      <img name="file" type="file"/>
-      <button type="button" id = "btn" >click</button>
-
-  </form> -->
+  </form> 
   </fieldset>
     <br><br>
 
     <br><br>
 
 
-    <!-- <button id = "clear" class="clear" onclick="clearCanvas()" style="visibility:hidden">Restart</button> -->
     <br><br>
     <h3 id = "info"></h3>
 
