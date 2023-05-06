@@ -14,7 +14,7 @@ import cv2
 
 
 def get_suggested_colors(image):
-    model = keras.models.load_model('800_inception_model.h5')
+    model = keras.models.load_model('last_inception_model.h5')
     target_shape = (hp.img_size, hp.img_size, 3)
 
     # test_data=tfds.load("tf_flowers", split="train")
@@ -69,7 +69,7 @@ def get_suggested_colors(image):
 
 
 def get_colorized_inception(image):
-    model = keras.models.load_model('800_inception_model.h5')
+    model = keras.models.load_model('last_inception_model.h5')
     target_shape = (hp.img_size, hp.img_size, 3)
 
     image = img_to_array(image)
