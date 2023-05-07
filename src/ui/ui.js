@@ -18,8 +18,15 @@ const suggestedColorsDiv = document.getElementById('suggestedColors');
 
 
 const outputImage = document.getElementById('outputImage');
+var real_width = 0
+var rescaled_width = 0
+var real_height = 0
+var rescaled_height = 0
+var dx = 0
+var dy = 0
 
 
+// Source: https://stackoverflow.com/questions/3971841/how-to-resize-images-proportionally-keeping-the-aspect-ratio
 function calculateAspectRatioFit(srcWidth, srcHeight, maxWidth, maxHeight) {
     var ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
     return { width: srcWidth*ratio, height: srcHeight*ratio };
@@ -43,6 +50,14 @@ upload.addEventListener('change', function() {
     var ratio = calculateAspectRatioFit(image.width, image.height, canvas.width, canvas.height);
     var xOffset = ratio.width < canvas.width ? ((canvas.width - ratio.width) / 2) : 0;
     var yOffset = ratio.height < canvas.height ? ((canvas.height - ratio.height) / 2) : 0;
+
+    real_width = image.width;
+    real_height = image.height;
+    rescaled_width=ratio.width;
+    rescaled_height = ratio.height;
+
+    dx = xOffset
+    dy = yOffset
 
       context.drawImage(image, xOffset, yOffset, ratio.width, ratio.height);
       colorPalette.style.visibility="visible";
@@ -92,14 +107,19 @@ const coords = []
 // Draw on canvas
 // Everytime a point is drawn into the picture, an API call is made to send picture, x and y coordinates, and selected color
 canvas.addEventListener('mousedown', function(event) {
-  const x = event.offsetX;
-  const y = event.offsetY;
+  const canvas_x = event.offsetX;
+  const canvas_y = event.offsetY;
+  const x = Math.floor((event.offsetX - dx)  / (rescaled_width/real_width) )
+  const y = Math.floor((event.offsetY- dy)  / (rescaled_height/real_height) )
+  console.log("here")
+  console.log(x, y)
+
   var color = getSelectedColor();
   coords.push({x:x, y:y, color:color})
   context.fillStyle = color;
   context.beginPath();
-  context.moveTo(x, y);
-  context.arc(x, y, 2.5, 0, Math.PI * 2, false);
+  context.moveTo(canvas_x, canvas_y);
+  context.arc(canvas_x, canvas_y, 2.5, 0, Math.PI * 2, false);
   context.fill();
 
   formData.set('coords', JSON.stringify(coords));
