@@ -6,14 +6,17 @@ import numpy as np
 def do_nothing(image, points, colors, model):
 #    return tf.constant(image).numpy()
 
-    points = tf.cast(points, tf.float32)
     image = tf.cast(image, tf.float32)
     image = image / 255.0
     before_height, before_width, _ = image.shape
     image = tf.image.resize(image, (image_height, image_width))
     image = tf.image.rgb_to_yuv(image)
-
     image = image[:,:,:1]
+
+    points = tf.cast(points, tf.float32)
+    scale_points = [[image_height/before_height, image_width/before_width]]
+    points = points * scale_points
+
     colors = tf.cast(colors, tf.dtypes.float32)
     colors = tf.image.rgb_to_yuv(colors / 255.0)
     colors = colors[:,1:]

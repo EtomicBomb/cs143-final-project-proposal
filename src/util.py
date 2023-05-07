@@ -28,26 +28,25 @@ def colorize(grey, points, colors, model):
 
 if __name__ == '__main__':
     from skimage.io import imread
-    from skimage.io import imshow
+    from skimage.io import imshow, imsave
     from skimage.transform import resize
     from skimage import img_as_float32
     import numpy as np
     import matplotlib.pyplot as plt
 
     # input can come from numpy, memory, anywhere
-#    image = imread('flower.jpg')
+    image = imread('flower.jpg')
 #    image = imread('raw/40410686_272bc66faf_m.jpg')
 #    image = imread('raw/130684941_d1abfa3be6_m.jpg')
 #    image = imread('raw/2767658405_1e2043f44c_n.jpg')
 #    image = imread('oxford/test/image_00658.jpg') # does a pretty poor job at this one
-    image = imread('oxford/test/image_04027.jpg')
+    image = imread('saves/b.jpg') 
+#    image = imread('oxford/test/image_04027.jpg')
 #    image = imread('oxford/test/image_08089.jpg')
 #    image = imread('oxford/test/image_08033.jpg')
 #    image = imread('oxford/test/image_07937.jpg')  # nails this one with no hints!
 #    image = imread('oxford/test/image_08186.jpg') # you can hint the color of this flower! [70,70]
-#    image = imread('oxford/train/image_03929.jpg')
     image = img_as_float32(image)
-    image = resize(image, (image_height, image_width, 3), anti_aliasing=True)
 
     points = [
 #        [20,20],
@@ -56,6 +55,9 @@ if __name__ == '__main__':
 #        [223,210],
 #        [50,112],
 #        [175,175],
+        [30, 220],
+        [445, 53],
+        [301, 123],
     ]
 
     colors = [
@@ -64,37 +66,53 @@ if __name__ == '__main__':
 #        [0, 0, 255],
 #        [255, 255, 255],
 #        [255, 128, 0],
+#        [179, 72, 118]
+#        [255, 255, 0],
+        [112, 219, 239],
+        [59, 116, 84],
+        [59, 116, 84],
     ]
 
-    model = tf.keras.models.load_model('check/f.h5')
-#    model = tf.keras.models.load_model('check/e.h5')
-#    model = tf.keras.models.load_model('check/d.h5')
+    model = tf.keras.models.load_model('check/g.h5')
 
     # convert before giving to colorize
 
     image = tf.image.rgb_to_yuv(image)
 
-    # feed whole color and predict (for testing)
-    predicted, = model.predict((
-        tf.expand_dims(image[:,:,:1], axis=0), 
-        tf.expand_dims(tf.fill(image[:,:,:1].shape, True), axis=0), 
-        tf.expand_dims(image[:,:,1:], axis=0),
-    ))
-    predicted = tf.concat((image[:,:,:1], predicted), axis=-1)
-    predicted = tf.image.yuv_to_rgb(predicted)
+    before_image = image
+    before_height, before_width, _ = image.shape
+    image = tf.image.resize(image, (image_height, image_width), antialias=True)
 
-#    # predict using generated points
-#    image = image[:,:,:1]
-#    points = tf.reshape(points, (-1, 2))
-#    points = tf.cast(points, tf.dtypes.float32)
-#    colors = tf.reshape(colors, (-1, 3))
-#    colors = tf.cast(colors, tf.dtypes.float32)
-#    print(colors.shape)
-#    if colors.shape[0] != 0:
-#        colors = tf.image.rgb_to_yuv(colors / 255.0)
-#    colors = colors[:,1:]
-#    predicted = colorize(image, points, colors, model)
+#    # feed whole color and predict (for testing)
+#    predicted, = model.predict((
+#        tf.expand_dims(image[:,:,:1], axis=0), 
+#        tf.expand_dims(tf.fill(image[:,:,:1].shape, True), axis=0), 
+#        tf.expand_dims(image[:,:,1:], axis=0),
+#    ))
+#    predicted = tf.concat((image[:,:,:1], predicted), axis=-1)
 #    predicted = tf.image.yuv_to_rgb(predicted)
 
+    # predict using generated points
+    image = image[:,:,:1]
+    points = tf.reshape(points, (-1, 2))
+    points = tf.cast(points, tf.dtypes.float32)
+    colors = tf.reshape(colors, (-1, 3))
+    colors = tf.cast(colors, tf.dtypes.float32)
+    colors = tf.image.rgb_to_yuv(colors / 255.0)
+    colors = colors[:,1:]
+    predicted = colorize(image, points, colors, model)
+    predicted = tf.image.resize(predicted, (before_height, before_width))
+    predicted = tf.concat((before_image[:,:,:1], predicted[:,:,1:]), axis=-1)
+    predicted = tf.image.yuv_to_rgb(predicted)
+
+    imsave('saves/save.png', predicted)
+
+    s = make_sample(image_height, image_width, points, 5)
+    s = tf.reduce_sum(s, axis=-1)
+
+
+
+    imgplot = plt.imshow(s.numpy())
+    plt.show()
     imgplot = plt.imshow(predicted.numpy())
     plt.show()
