@@ -36,7 +36,7 @@ def colorize_image():
             y = coord['y']
             col = coord['color']
             col = ImageColor.getcolor(col, "RGB")
-            points.append((x, y))
+            points.append((y, x))
             colors.append(col)
     except:
        points=[]
