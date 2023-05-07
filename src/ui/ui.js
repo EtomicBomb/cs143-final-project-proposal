@@ -113,6 +113,7 @@ canvas.addEventListener('mousedown', function(event) {
   const y = Math.floor((event.offsetY- dy)  / (rescaled_height/real_height) )
   console.log("here")
   console.log(x, y)
+  if (x >=0 & y >=0 & x <= real_width & y <= real_height){
 
   var color = getSelectedColor();
   coords.push({x:x, y:y, color:color})
@@ -144,7 +145,7 @@ canvas.addEventListener('mousedown', function(event) {
   img.src = URL.createObjectURL(data);
 })
 
-});
+}});
 
 
 function do_something(){fetch('http://127.0.0.1:5000/inception_image', {
