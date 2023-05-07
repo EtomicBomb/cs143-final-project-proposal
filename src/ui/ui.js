@@ -48,7 +48,6 @@ upload.addEventListener('change', function() {
       colorPalette.style.visibility="visible";
       clear.style.visibility="visible";
       colorizeBtn.style.visibility="visible";
-      suggestedColorsDiv.style.visibility="visible";
 
       uploadLabel.style.visibility="hidden";
 
@@ -73,6 +72,12 @@ upload.addEventListener('change', function() {
     let r = arr[i][0];
     let g = arr[i][1];
     let b = arr[i][2];
+    suggestedColorsDiv.style.visibility="visible";
+
+    // let r = Math.min(Math.round(arr[i][0] * 1.2), 255);
+    // let g = Math.min(Math.round(arr[i][1] * 1.2), 255);
+    // let b = Math.min(Math.round(arr[i][2] * 1.2), 255);
+   
     i = i + 1;
       color.style.background=rgbToHex(r,g,b)    
     });

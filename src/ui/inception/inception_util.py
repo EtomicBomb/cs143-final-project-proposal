@@ -12,6 +12,7 @@ import tensorflow_datasets as tfds
 from sklearn.cluster import KMeans
 from collections import Counter
 import inception_params as hp
+import cv2
 
 
 
@@ -32,7 +33,6 @@ def get_train_data():
     ds = tfds.load('tf_flowers', split='train')
     ds = ds.map(preprocess_image)
 
-    # Create an array from the dataset
     X = []
     for i in ds:
         X.append(img_to_array(i))
@@ -79,3 +79,22 @@ def get_top_5_colors(lab_img):
         top_rgb_colors.append(rgb_color_int)
     # print(top_rgb_colors)
     return top_rgb_colors
+
+
+# Source: https://pyimagesearch.com/2015/10/05/opencv-gamma-correction/
+def adjust_gamma(image, gamma=1.5):
+    inv_gamma = 1.0 / gamma
+    table = np.array([((i / 255.0) ** inv_gamma) * 255 for i in np.arange(0, 256)]).astype(np.uint8)
+    # apply gamma correction using the lookup table
+    image = cv2.LUT(image, table)
+    return image
+
+
+def lighten_rgb(color, coeff):
+    r, g, b = tf.split(color, 3, axis=-1)
+    r = tf.cast(r, tf.float32) * coeff
+    g = tf.cast(g, tf.float32) * coeff
+    b = tf.cast(b, tf.float32) * coeff
+    new_col = tf.concat([r, g, b], axis=-1)
+    new_col = tf.clip_by_value(new_col, 0.0, 255.0)
+    return new_col
