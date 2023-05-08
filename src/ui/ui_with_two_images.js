@@ -18,6 +18,10 @@ const selectedColor = document.getElementById('selectedColor');
 const suggestedColors = document.querySelectorAll('.color');
 const suggestedColorsDiv = document.getElementById('suggestedColors');
 
+const main = document.getElementById("main");
+
+
+
 
 const outputImage = document.getElementById('outputImage');
 var real_width = 0
@@ -62,11 +66,15 @@ upload.addEventListener('change', function() {
     dy = yOffset
 
       context.drawImage(image, xOffset, yOffset, ratio.width, ratio.height);
-      colorPalette.style.visibility="visible";
+      // colorPalette.style.visibility="visible";
+      colorPalette.style.display="block";
+      main.style.marginTop="20px"
+
       clear.style.visibility="visible";
       colorizeBtn.style.visibility="visible";
 
-      uploadLabel.style.visibility="hidden";
+      // uploadLabel.style.visibility="hidden";
+      uploadLabel.style.display="none";
       groundTruthBtn.style.visibility="hidden";
 
 
