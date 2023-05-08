@@ -9,11 +9,10 @@ const context = canvas.getContext('2d');
 const canvasOutput = document.getElementById('canvasOutput');
 const context2 = canvasOutput.getContext('2d');
 
-const grayCanvas = document.getElementById('grayCanvas');
-const grayContext = grayCanvas.getContext('2d');
-
 const clear = document.getElementById('clear');
 const colorizeBtn = document.getElementById('colorize');
+const groundTruthBtn = document.getElementById('groundTruth');
+
 
 const selectedColor = document.getElementById('selectedColor');
 const suggestedColors = document.querySelectorAll('.color');
@@ -21,8 +20,6 @@ const suggestedColorsDiv = document.getElementById('suggestedColors');
 
 
 const outputImage = document.getElementById('outputImage');
-// const grayImage = document.getElementById('grayImg');
-
 var real_width = 0
 var rescaled_width = 0
 var real_height = 0
@@ -44,14 +41,13 @@ function uploadImage() {
 upload.addEventListener('change', function() {
   const file = upload.files[0];
   formData.append("file", file);
-  gray_me(file);
 
   const reader = new FileReader();
   reader.onload = function(event) {
     const image = new Image();
     image.onload = function() {
-      canvas.width = 280;
-      canvas.height = 230;
+      canvas.width = 400;
+      canvas.height = 350;
 
     var ratio = calculateAspectRatioFit(image.width, image.height, canvas.width, canvas.height);
     var xOffset = ratio.width < canvas.width ? ((canvas.width - ratio.width) / 2) : 0;
@@ -71,6 +67,7 @@ upload.addEventListener('change', function() {
       colorizeBtn.style.visibility="visible";
 
       uploadLabel.style.visibility="hidden";
+      groundTruthBtn.style.visibility="hidden";
 
 
     };
@@ -113,7 +110,7 @@ const coords = []
 
 // Draw on canvas
 // Everytime a point is drawn into the picture, an API call is made to send picture, x and y coordinates, and selected color
-grayCanvas.addEventListener('mousedown', function(event) {
+canvas.addEventListener('mousedown', function(event) {
   const canvas_x = event.offsetX;
   const canvas_y = event.offsetY;
   const x = Math.floor((canvas_x - dx)  / (rescaled_width/real_width) )
@@ -124,11 +121,11 @@ grayCanvas.addEventListener('mousedown', function(event) {
 
   var color = getSelectedColor();
   coords.push({x:x, y:y, color:color})
-  grayContext.fillStyle = color;
-  grayContext.beginPath();
-  grayContext.moveTo(canvas_x, canvas_y);
-  grayContext.arc(canvas_x, canvas_y, 2.5, 0, Math.PI * 2, false);
-  grayContext.fill();
+  context.fillStyle = color;
+  context.beginPath();
+  context.moveTo(canvas_x, canvas_y);
+  context.arc(canvas_x, canvas_y, 2.5, 0, Math.PI * 2, false);
+  context.fill();
 
   formData.set('coords', JSON.stringify(coords));
   console.log(JSON.stringify(coords))
@@ -172,36 +169,6 @@ function do_something(){fetch('http://127.0.0.1:5000/inception_image', {
   };
   img.src = URL.createObjectURL(data);
 })}
-
-
-function gray_me(file){
-  grayImage = new Image()
-  grayImage.src = URL.createObjectURL(file);
-    
-  grayImage.onload=function() {
-
-    var ratio = calculateAspectRatioFit(grayImage.width, grayImage.height, grayCanvas.width, grayCanvas.height);
-    var xOffset = ratio.width < grayCanvas.width ? ((grayCanvas.width - ratio.width) / 2) : 0;
-    var yOffset = ratio.height < grayCanvas.height ? ((grayCanvas.height - ratio.height) / 2) : 0;
-
-    grayContext.drawImage(grayImage, xOffset, yOffset, ratio.width, ratio.height);
-
-    const imageData = grayContext.getImageData(0, 0, grayCanvas.width, grayCanvas.height);
-    const data = imageData.data;
-
-    for (let i = 0; i < data.length; i += 4) {
-      const r = data[i];
-      const g = data[i + 1];
-      const b = data[i + 2];
-      // https://en.wikipedia.org/wiki/Grayscale#Converting_color_to_grayscale
-      const gray = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-      data[i] = data[i + 1] = data[i + 2] = gray;
-    }
-
-    grayContext.putImageData(imageData, 0, 0);
-
-  }
-}
 
 
 

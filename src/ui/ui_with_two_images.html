@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Color Me This!</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="logo_text.png" type="image/png">
+
+    
+
+ 
+  </head>
+  <body>
+    <div class = "header">
+      <img src="logo_text.png" height="100" width="auto" class="center">
+
+    </div>
+    <div class="main">
+
+
+
+
+
+    <fieldset class="up" >
+
+      <canvas id="uploadCanvas" width=100 height=150></canvas>
+    
+      <div id="colorPalette" style="visibility:hidden">
+        <br>  <br> 
+        <label for="colorPalette" style="color:black; font-weight:bold">Select a color:</label> <br>  <br> 
+
+        <input id="selectedColor" type="color"> <br><br> <br><br><br>
+      </div>
+
+      <div id="suggestedColors" class="suggestedColors" style="visibility:hidden" >
+        <label for="suggestedColors" class="lab">Suggested colors </label><br>
+       
+        <div id="color1" class="color" style="background:#b537d4"></div>
+        <div id="color2" class="color" style="background: #b4f0e1;"></div>
+        <div id="color3" class="color" style="background: #00ff15d7;"></div>
+        <div id="color4" class="color" style="background: #585758;"></div>
+        <div id="color5" class="color" style="background: #e9a7e9;"></div>
+
+      </div>
+
+      <br><br>
+      <br>
+
+
+
+
+      
+     
+      <button id="colorize" class="clear" style="visibility:hidden;margin-left:10px;" onclick="do_something()">Colorize!</button>
+
+
+      <button id = "clear" class="clear" onclick="clearCanvas()" style="visibility:hidden;margin-right:15px">Restart</button><br>
+      <label id = "uploadLabel" for="upload" class="upload">Upload a Grayscale Image</label><br><br>
+      <button id = "groundTruth" class = "clear" onclick="changePage()">I have an image in colors...</button><br>
+      <input type="file" id="upload" name="nana" class="hidden" accept="image/*" > <br><br> <br>
+
+
+    </fieldset>
+    
+  
+
+    <fieldset class="fieldset"><legend>Input Image</legend>
+
+    <canvas id="canvas" width=400 height=350></canvas></fieldset>
+
+
+  
+    <fieldset class="fieldset"><legend>Colorized Output</legend>
+
+    <canvas id="canvasOutput" width=400 height=350></canvas>
+    <img id="outputImage" src="">
+
+  </form> 
+  </fieldset>
+    <br><br>
+
+    <br><br>
+
+
+    <br><br>
+    <h3 id = "info"></h3>
+
+     
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript"></script>
+    <script src="ui_with_two_images.js"></script>
+
+    <script>
+        function changePage() {
+            window.location.href = "ui.html";
+
+        }
+        </script>
+
+  </div>
+
+
+
+  </body>
+</html>
