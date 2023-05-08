@@ -160,7 +160,7 @@ canvas.addEventListener('mousedown', function(event) {
 }});
 
 
-function do_something(){fetch('http://127.0.0.1:5000/inception_image', {
+function show_inception_image(){fetch('http://127.0.0.1:5000/inception_image', {
   method: 'POST',
   body: formData,
 })
