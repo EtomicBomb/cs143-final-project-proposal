@@ -109,8 +109,8 @@ const coords = []
 canvas.addEventListener('mousedown', function(event) {
   const canvas_x = event.offsetX;
   const canvas_y = event.offsetY;
-  const x = Math.floor((event.offsetX - dx)  / (rescaled_width/real_width) )
-  const y = Math.floor((event.offsetY- dy)  / (rescaled_height/real_height) )
+  const x = Math.floor((canvas_x - dx)  / (rescaled_width/real_width) )
+  const y = Math.floor((canvas_y - dy)  / (rescaled_height/real_height) )
   console.log("here")
   console.log(x, y)
   if (x >=0 & y >=0 & x <= real_width & y <= real_height){
