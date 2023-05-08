@@ -26,10 +26,10 @@
       <canvas id="uploadCanvas" width=100></canvas>
     
       <div id="colorPalette" style="visibility:hidden">
-        <br>  <br> 
+        <br>  <br>  <br>  <br> 
         <label for="colorPalette" style="color:black; font-weight:bold">Select a color:</label> <br>  <br> 
 
-        <input id="selectedColor" type="color"> <br><br> <br><br><br>
+        <input id="selectedColor" type="color"> <br><br> <br>
       </div>
 
       <div id="suggestedColors" class="suggestedColors" style="visibility:hidden" >
@@ -44,7 +44,7 @@
       </div>
 
       <br><br>
-      <br>
+
 
 
 
@@ -57,26 +57,37 @@
       <button id = "clear" class="clear" onclick="clearCanvas()" style="visibility:hidden;margin-right:15px">Restart</button><br>
       <label id = "uploadLabel" for="upload" class="upload">Upload Image</label>
 
-      <input type="file" id="upload" name="nana" class="hidden" accept="image/*" > <br><br> <br><br><br><br><br><br>
+      <input type="file" id="upload" name="nana" class="hidden" accept="image/*" > <br><br> <br><br><br><br><br><br><br>
 
 
     </fieldset>
     
   
 
-    <fieldset class="fieldset"><legend>Input Image</legend>
+    <fieldset class="fieldset"><legend>Ground Truth Image</legend>
 
-    <canvas id="canvas" width=400 height=350></canvas></fieldset>
+    <canvas id="canvas" width=280 height=230></canvas></fieldset>
+
+
+  <fieldset class="fieldset"><legend>Gray Image</legend>
+
+    <canvas id="grayCanvas" width=280 height=230></canvas>
+    <img id="grayImg" src="">
+  </fieldset>
 
 
   
     <fieldset class="fieldset"><legend>Colorized Output</legend>
 
-    <canvas id="canvasOutput" width=400 height=350></canvas>
+    <canvas id="canvasOutput" width=280 height=230></canvas>
     <img id="outputImage" src="">
+
+    
 
   </form> 
   </fieldset>
+
+
     <br><br>
 
     <br><br>
