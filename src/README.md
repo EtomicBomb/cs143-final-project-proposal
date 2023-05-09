@@ -13,6 +13,7 @@
      - but regular autoencoder/unet models have totally different input, output shape
          - find some way to make this work
      - using a pretrained colorizer feels gross
+     - tried to use pre-trained model weights from the original paper, however, was not able to imports the weights. 
 * remove low chroma images (and greyscale images) from existing set
 * more sophisticated weight initialization (Colorful Colorization, uses k-means initialization from "Data-dependent initializations of convolutional neural networks.")
 * new, bigger training image set

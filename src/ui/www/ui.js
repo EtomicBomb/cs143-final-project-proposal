@@ -9,6 +9,9 @@ const context = canvas.getContext('2d');
 const canvasOutput = document.getElementById('canvasOutput');
 const context2 = canvasOutput.getContext('2d');
 
+const grayCanvas = document.getElementById('grayCanvas');
+const grayContext = grayCanvas.getContext('2d');
+
 const clear = document.getElementById('clear');
 const colorizeBtn = document.getElementById('colorize');
 
@@ -18,8 +21,17 @@ const suggestedColorsDiv = document.getElementById('suggestedColors');
 
 
 const outputImage = document.getElementById('outputImage');
+// const grayImage = document.getElementById('grayImg');
+
+var real_width = 0
+var rescaled_width = 0
+var real_height = 0
+var rescaled_height = 0
+var dx = 0
+var dy = 0
 
 
+// Source: https://stackoverflow.com/questions/3971841/how-to-resize-images-proportionally-keeping-the-aspect-ratio
 function calculateAspectRatioFit(srcWidth, srcHeight, maxWidth, maxHeight) {
     var ratio = Math.min(maxWidth / srcWidth, maxHeight / srcHeight);
     return { width: srcWidth*ratio, height: srcHeight*ratio };
@@ -32,25 +44,34 @@ function uploadImage() {
 upload.addEventListener('change', function() {
   const file = upload.files[0];
   formData.append("file", file);
+  gray_me(file);
 
   const reader = new FileReader();
   reader.onload = function(event) {
     const image = new Image();
     image.onload = function() {
-      canvas.width = 400;
-      canvas.height = 350;
+      canvas.width = 280;
+      canvas.height = 230;
 
     var ratio = calculateAspectRatioFit(image.width, image.height, canvas.width, canvas.height);
     var xOffset = ratio.width < canvas.width ? ((canvas.width - ratio.width) / 2) : 0;
     var yOffset = ratio.height < canvas.height ? ((canvas.height - ratio.height) / 2) : 0;
 
+    real_width = image.width;
+    real_height = image.height;
+    rescaled_width=ratio.width;
+    rescaled_height = ratio.height;
+
+    dx = xOffset
+    dy = yOffset
+
       context.drawImage(image, xOffset, yOffset, ratio.width, ratio.height);
       colorPalette.style.visibility="visible";
       clear.style.visibility="visible";
       colorizeBtn.style.visibility="visible";
-      suggestedColorsDiv.style.visibility="visible";
 
       uploadLabel.style.visibility="hidden";
+
 
     };
     image.src = event.target.result;
@@ -70,9 +91,15 @@ upload.addEventListener('change', function() {
 
     suggestedColors.forEach(color => {
   
-    let r = Math.max(0, arr[i][0] - 50);
-    let g = Math.max(0, arr[i][1] - 10);
-    let b = Math.min(255, arr[i][2] + 80);
+    let r = arr[i][0];
+    let g = arr[i][1];
+    let b = arr[i][2];
+    suggestedColorsDiv.style.visibility="visible";
+
+    // let r = Math.min(Math.round(arr[i][0] * 1.2), 255);
+    // let g = Math.min(Math.round(arr[i][1] * 1.2), 255);
+    // let b = Math.min(Math.round(arr[i][2] * 1.2), 255);
+   
     i = i + 1;
       color.style.background=rgbToHex(r,g,b)    
     });
@@ -86,18 +113,23 @@ const coords = []
 
 // Draw on canvas
 // Everytime a point is drawn into the picture, an API call is made to send picture, x and y coordinates, and selected color
-canvas.addEventListener('mousedown', function(event) {
-  const x = event.offsetX;
-  const y = event.offsetY;
+grayCanvas.addEventListener('mousedown', function(event) {
+  const canvas_x = event.offsetX;
+  const canvas_y = event.offsetY;
+  const x = Math.floor((canvas_x - dx)  / (rescaled_width/real_width) )
+  const y = Math.floor((canvas_y - dy)  / (rescaled_height/real_height) )
+  console.log("here")
+  console.log(x, y)
+  if (x >=0 & y >=0 & x <= real_width & y <= real_height){
+
   var color = getSelectedColor();
   coords.push({x:x, y:y, color:color})
-  context.fillStyle = color;
-  context.beginPath();
-  context.moveTo(x, y);
-  context.arc(x, y, 2.5, 0, Math.PI * 2, false);
-  context.fill();
-  // TODO: ensure x and y are true-to-size and not resized or canvas coefficients 
-  // TODO: actually models will resize pictures -- instead of rescaling, might need to crop : ) -- or not, TBD really
+  grayContext.fillStyle = color;
+  grayContext.beginPath();
+  grayContext.moveTo(canvas_x, canvas_y);
+  grayContext.arc(canvas_x, canvas_y, 2.5, 0, Math.PI * 2, false);
+  grayContext.fill();
+
   formData.set('coords', JSON.stringify(coords));
   console.log(JSON.stringify(coords))
   formData.append("color", color);
@@ -118,12 +150,62 @@ canvas.addEventListener('mousedown', function(event) {
     context2.drawImage(img, xOffset, yOffset, ratio.width, ratio.height);
   };
   img.src = URL.createObjectURL(data);
-console.log("haha");
 })
 
-  
+}});
 
-});
+
+function show_inception_image(){fetch('/inception_image', {
+  method: 'POST',
+  body: formData,
+})
+
+.then(response => response.blob())
+.then(data => {
+    var img = new Image();
+  img.onload = function() {
+    var ratio = calculateAspectRatioFit(img.width, img.height, canvasOutput.width, canvasOutput.height);
+    var xOffset = ratio.width < canvasOutput.width ? ((canvasOutput.width - ratio.width) / 2) : 0;
+    var yOffset = ratio.height < canvasOutput.height ? ((canvasOutput.height - ratio.height) / 2) : 0;
+
+    context2.drawImage(img, xOffset, yOffset, ratio.width, ratio.height);
+  };
+  img.src = URL.createObjectURL(data);
+})}
+
+
+function gray_me(file){
+  grayImage = new Image()
+  grayImage.src = URL.createObjectURL(file);
+    
+  grayImage.onload=function() {
+
+    var ratio = calculateAspectRatioFit(grayImage.width, grayImage.height, grayCanvas.width, grayCanvas.height);
+    var xOffset = ratio.width < grayCanvas.width ? ((grayCanvas.width - ratio.width) / 2) : 0;
+    var yOffset = ratio.height < grayCanvas.height ? ((grayCanvas.height - ratio.height) / 2) : 0;
+
+    grayContext.drawImage(grayImage, xOffset, yOffset, ratio.width, ratio.height);
+
+    const imageData = grayContext.getImageData(0, 0, grayCanvas.width, grayCanvas.height);
+    const data = imageData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      // https://en.wikipedia.org/wiki/Grayscale#Converting_color_to_grayscale
+      const gray = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      data[i] = data[i + 1] = data[i + 2] = gray;
+    }
+
+    grayContext.putImageData(imageData, 0, 0);
+
+  }
+}
+
+
+
+
 
 // Convert color from RGB format to Hex
 function rgbToHex(r, g, b) {
