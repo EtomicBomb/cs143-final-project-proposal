@@ -1,4 +1,21 @@
 # CSCI 1430 Final Project: Colorization
 
 
+Navigate to src/ui/ and run `python3 app.py` to start the Flask app. Open the `src/ui/initial_ui.html` in your browser of choice. 
+
+You should be directed to the page shown below.
+
+
+
+![image info](./readme_pictures/ui_firstp.png)
+
+Upload a grayscale image to start colorizing. If you want to start with a colorized image and compare your ground truth image to our colorized output, click on "I have an image in colors...". You will be redirected to the page below.
+
+![image info](./readme_pictures/ui_inception.png)
+
+1) Upload your image.
+2) Click "Colorize!" to see the result of the automatic colorization with the CNN/Inception-ResNet-V2 model.
+3) Choose colors from either the RGB color picker labeled "Select a color", or from the palette of suggested colors.
+4) Draw your color hints on the gray-scale image.
+5) You should be able to see a colorized output in real-time after every added color hint!
 
