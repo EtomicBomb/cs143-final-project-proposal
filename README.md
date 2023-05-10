@@ -1,7 +1,12 @@
-# CSCI 1430 Final Project: Colorization
+# **CSCI 1430 Final Project: Colorization**
+
+### **Poster**
+![image info](./poster.jpg)
 
 
-Download the CNN encoder-decoder model with Inception-ResNet-V2 with the following command:
+### **Instructions to try the model locally with the UI**
+
+First, Download the CNN encoder-decoder model with Inception-ResNet-V2 with the following command:
 `gdown --fuzzy 'https://drive.google.com/file/d/1EZELjypMQbp2qFXuXlBUD-E9HIirZiXr/view?usp=share_link'`
 
 Download the U-Net model for user-guided colorization with the following command:
