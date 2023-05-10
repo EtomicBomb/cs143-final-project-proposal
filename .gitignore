@@ -8,7 +8,6 @@
 **/*.out
 **/*.synctex.gz
 **/*.log
-**/*.pdf
 **/*.h5
 
 **/.DS_Store/
