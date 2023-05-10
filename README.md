@@ -3,7 +3,7 @@
 
 See demo below:
 
-<video src="[LINK](https://github.com/EtomicBomb/cs143-final-project-proposal/assets/77747926/7c045078-7d2f-4961-923e-5c24f9f29e3e)" controls="controls" style="max-width: 730px;">
+<video src="[https://github.com/EtomicBomb/cs143-final-project-proposal/assets/77747926/7c045078-7d2f-4961-923e-5c24f9f29e3e](https://github.com/EtomicBomb/cs143-final-project-proposal/assets/77747926/7c045078-7d2f-4961-923e-5c24f9f29e3e)" controls="controls" style="max-width: 730px;">
 </video>
 
 
