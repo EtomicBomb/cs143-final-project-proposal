@@ -83,15 +83,6 @@ if __name__ == '__main__':
     before_height, before_width, _ = image.shape
     image = tf.image.resize(image, (image_height, image_width), antialias=True)
 
-#    # feed whole color and predict (for testing)
-#    predicted, = model.predict((
-#        tf.expand_dims(image[:,:,:1], axis=0), 
-#        tf.expand_dims(tf.fill(image[:,:,:1].shape, True), axis=0), 
-#        tf.expand_dims(image[:,:,1:], axis=0),
-#    ))
-#    predicted = tf.concat((image[:,:,:1], predicted), axis=-1)
-#    predicted = tf.image.yuv_to_rgb(predicted)
-
     # predict using generated points
     image = image[:,:,:1]
     points = tf.reshape(points, (-1, 2))

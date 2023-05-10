@@ -25,10 +25,6 @@ def path_to_training_example(image):
         num_points = tf.cast(num_points, tf.int64)
         points = tf.random.normal((num_points, 2), mean=(height/2,width/2), stddev=(height/4,width/4))
         points = tf.clip_by_value(points, 0, (height, width))
-#        points_rows = tf.random.uniform((num_points,1), minval=0, maxval=height, dtype=tf.int32)
-#        points_cols = tf.random.uniform((num_points,1), minval=0, maxval=width, dtype=tf.int32)
-#        points = tf.concat((points_rows, points_cols), axis=-1)
-#        points = tf.cast(points, dtype=tf.int32)
 
         colors = sample(color, points, hint_sample_variance)
         hint_mask, hint_color = create_hints(height, width, points, colors, hint_threshold, hint_sample_variance)

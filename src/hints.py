@@ -35,16 +35,6 @@ def create_hints(height, width, points, colors, hint_threshold, sample_var):
         - hint_mask (height, width, 1)
         - hint_color (height, width, 2)
     '''
-#    rows, cols = points[:,0], points[:,1]
-#    rows = tf.reshape(rows, (1, 1, -1))
-#    cols = tf.reshape(cols, (1, 1, -1))
-#
-#    drow = tf.reshape(tf.range(width), (1, -1, 1))
-#    dcol = tf.reshape(tf.range(height), (-1, 1, 1))
-    # this is confusing me, but drow has values ranging from (0, width), and so does cols
-#    hint_mask = (drow == cols) & (dcol == rows)
-#    hint_mask = (drow-cols)**2 + (dcol-rows)**2 <= hint_radius**2
-
     hint_mask = make_sample(height, width, points, sample_var)
     hint_mask = hint_mask > hint_threshold
     hint_mask = prune_hint_mask(hint_mask)
@@ -105,8 +95,6 @@ if __name__ == '__main__':
     ], dtype=tf.float32)
 
 
-#    points = tf.random.normal((num_points, 2), mean=(height/2,width/2), stddev=(height/4,width/4))
-#    points = tf.clip_by_value(points, 0, (height, width))
     s = make_sample(height, width, points, sample_var)
 
     s = tf.reduce_sum(s, axis=-1)
@@ -132,11 +120,6 @@ if __name__ == '__main__':
     image = tf.image.rgb_to_yuv(image)
     grey = image[:,:,:1]
     color = image[:,:,1:]
-
-#    rng = tf.random.Generator.from_seed(0)
-#    points_rows = rng.uniform((num_points, 1), minval=0, maxval=image_height, dtype=tf.dtypes.int32)
-#    points_cols = rng.uniform((num_points, 1), minval=0, maxval=image_width, dtype=tf.dtypes.int32)
-#    points = tf.concat((points_rows, points_cols), axis=-1)
 
     points = tf.random.normal((num_points, 2), mean=(height/2,width/2), stddev=(height/4,width/4))
     points = tf.clip_by_value(points, 0, (height, width))
