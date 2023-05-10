@@ -1,5 +1,10 @@
 # **CSCI 1430 Final Project: Colorization**
 
+
+See demo below:
+https://github.com/EtomicBomb/cs143-final-project-proposal/assets/77747926/7c045078-7d2f-4961-923e-5c24f9f29e3e
+
+
 ### **Poster**
 ![image info](./poster.jpg)
 
@@ -33,4 +38,8 @@ Upload a grayscale image to start colorizing. If you want to start with a colori
 3) Choose colors from either the RGB color picker labeled "Select a color", or from the palette of suggested colors.
 4) Draw your color hints on the gray-scale image.
 5) You should be able to see a colorized output in real-time after every added color hint!
+
+
+
+
 
