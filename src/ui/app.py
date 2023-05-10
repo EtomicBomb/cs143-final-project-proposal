@@ -13,7 +13,7 @@ sys.path.append('./inception')
 from dummy import do_nothing
 from inception import get_suggested_colors, get_colorized_inception
 
-model = tf.keras.models.load_model('../check/g.h5')
+model = tf.keras.models.load_model('../check/new.h5')
 
 app = Flask(__name__)
 CORS(app)
