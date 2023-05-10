@@ -3,8 +3,14 @@
 
 See demo below:
 
-<video src="[https://github.com/EtomicBomb/cs143-final-project-proposal/assets/77747926/7c045078-7d2f-4961-923e-5c24f9f29e3e](https://github.com/EtomicBomb/cs143-final-project-proposal/assets/77747926/7c045078-7d2f-4961-923e-5c24f9f29e3e)" controls="controls" style="max-width: 730px;">
-</video>
+
+https://github.com/EtomicBomb/cs143-final-project-proposal/assets/77747926/05f27bdf-39d0-411b-b54a-30264ed1b811
+
+
+
+
+
+
 
 
 ### **Poster**
