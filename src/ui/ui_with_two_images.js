@@ -108,7 +108,7 @@ upload.addEventListener('change', function() {
     i = i + 1;
       color.style.background=rgbToHex(r,g,b)    
     });
-console.log(data); console.log("received");})
+})
 
     
 });
@@ -123,8 +123,7 @@ canvas.addEventListener('mousedown', function(event) {
   const canvas_y = event.offsetY;
   const x = Math.floor((canvas_x - dx)  / (rescaled_width/real_width) )
   const y = Math.floor((canvas_y - dy)  / (rescaled_height/real_height) )
-  console.log("here")
-  console.log(x, y)
+
   if (x >=0 & y >=0 & x <= real_width & y <= real_height){
 
   var color = getSelectedColor();
@@ -136,7 +135,6 @@ canvas.addEventListener('mousedown', function(event) {
   context.fill();
 
   formData.set('coords', JSON.stringify(coords));
-  console.log(JSON.stringify(coords))
   formData.append("color", color);
 
   fetch('http://127.0.0.1:5000/input_image', {
@@ -205,16 +203,7 @@ function getSelectedColor() {
 }
 
 
-// Clear the canvas
+// Clear the canvas / reload the page
 function clearCanvas() {
-  // context.clearRect(0, 0, canvas.width, canvas.height);
-  // context2.clearRect(0, 0, canvas.width, canvas.height);
-
-  // colorPalette.style.visibility="hidden";
-  // clear.style.visibility="hidden";
-  // colorizeBtn.style.visibility="hidden";
-  // suggestedColorsDiv.style.visibility="hidden";
-
-  // uploadLabel.style.visibility="visible";
   location.reload()
 }
