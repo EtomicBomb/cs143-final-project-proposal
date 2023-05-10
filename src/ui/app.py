@@ -10,7 +10,7 @@ import json
 
 sys.path.append('../')
 sys.path.append('./inception')
-from dummy import do_nothing
+from predict_output import predict_output
 from inception import get_suggested_colors, get_colorized_inception
 
 model = tf.keras.models.load_model('../check/new.h5')
@@ -45,7 +45,7 @@ def colorize_image():
     file = data['file']
     image = Image.open(file.stream)
 
-    image = do_nothing(image, points, colors, model)
+    image = predict_output(image, points, colors, model)
     print('finished prediction')
     image = Image.fromarray(image)
 

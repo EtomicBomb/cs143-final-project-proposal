@@ -1,10 +1,8 @@
 import tensorflow as tf
 from util import *
 from params import *
-import numpy as np
 
-def do_nothing(image, points, colors, model):
-#    return tf.constant(image).numpy()
+def predict_output(image, points, colors, model):
 
     image = tf.cast(image, tf.float32)
     image = image / 255.0
@@ -28,9 +26,3 @@ def do_nothing(image, points, colors, model):
     predicted = tf.cast(predicted, tf.uint8)
     predicted = predicted.numpy()
     return predicted
-
-
-def true_do_nothing(img, hints):
-    for hint in hints:
-        print("x=", hint[0], "y=", hint[1], "color=", hint[2])
-    return img

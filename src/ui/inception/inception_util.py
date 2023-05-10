@@ -53,7 +53,6 @@ def create_inception_embedding(grayscaled_rgb):
 
 # Source: https://blog.floydhub.com/colorizing-b-w-photos-with-neural-networks/
 def image_a_b_gen(batch_size):
-    # Image transformer
     for batch in datagen.flow(get_train_data(), batch_size=batch_size):
         grayscaled_rgb = gray2rgb(rgb2gray(batch))
         embed = create_inception_embedding(grayscaled_rgb)
@@ -77,7 +76,6 @@ def get_top_5_colors(lab_img):
         rgb = lab2rgb(np.reshape(color, (1, 1, 3)))
         rgb_color_int = np.round(rgb * 255).astype(int)
         top_rgb_colors.append(rgb_color_int)
-    # print(top_rgb_colors)
     return top_rgb_colors
 
 
