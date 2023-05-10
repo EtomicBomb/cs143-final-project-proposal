@@ -1,17 +1,6 @@
 # **CSCI 1430 Final Project: Colorization**
 
 
-See demo below:
-
-
-https://github.com/EtomicBomb/cs143-final-project-proposal/assets/77747926/05f27bdf-39d0-411b-b54a-30264ed1b811
-
-
-
-
-
-
-
 
 ### **Poster**
 ![image info](./poster.jpg)
@@ -51,3 +40,7 @@ Upload a grayscale image to start colorizing. If you want to start with a colori
 
 
 
+See video demo below:
+
+
+https://github.com/EtomicBomb/cs143-final-project-proposal/assets/77747926/05f27bdf-39d0-411b-b54a-30264ed1b811
