@@ -1,7 +1,17 @@
 # CSCI 1430 Final Project: Colorization
 
 
-Navigate to src/ui/ and run `python3 app.py` to start the Flask app. Open the `src/ui/initial_ui.html` in your browser of choice. 
+Download the CNN encoder-decoder model with Inception-ResNet-V2 with the following command:
+`gdown --fuzzy 'https://drive.google.com/file/d/1EZELjypMQbp2qFXuXlBUD-E9HIirZiXr/view?usp=share_link'`
+
+Download the U-Net model for user-guided colorization with the following command:
+
+`gdown --fuzzy 'https://drive.google.com/file/d/14tPr3DZnn-PmxijRKbQq1dQ6E46B3H3V/view?usp=share_link'`
+
+Make sure both of these files are located in `src/check`.
+
+
+Next, navigate to src/ui/ and run `python3 app.py` to start the Flask app. Open the `src/ui/initial_ui.html` in your browser of choice. 
 
 You should be directed to the page shown below.
 
